@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>尋找你的神獸好夥伴：如意龍年報到，好事各有不同</title>
+	<style>
+		html {
+			height: 100%;
+		}
+		body {
+			background-image: url('newyear2024_background.jpg');
+			background-repeat: no-repeat;
+			background-attachment: scroll;
+			background-size: auto 105%;
+			height: 100%;      
+		}
+		.window {
+			height: 100%;
+		}
+		.windowbg {
+			position: absolute;
+			top: 0;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			height: 90%;
+			z-index: 1;
+		}
+		.windowbg1 {
+			position: absolute;
+			top: 0;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			height: 90%;
+			z-index: 1;
+		}
+		.windowlion{
+			position: absolute;
+			top: 48.4236%;
+			right: 0;
+			left: 0;
+			margin: auto;
+			height: 25.0194%;
+			z-index: 2;
+		}
+		.windowlion:hover {
+			filter:drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+		}
+		.story {
+			width: 35vh;
+			display: flex;
+			flex-direction: row;
+			position: absolute;
+			top: 70%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.story img {
+			position: absoute;
+			top: 0%;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			z-index: 2;
+			height: 16.8421vh;
+		}
+		.option {
+			width: 35vh;
+			display: flex;
+			flex-direction: column;
+			position: absolute;
+			top: 43.158737%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.option img {
+			position: absoute;
+			top: 0%;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			z-index: 2;
+			height: 10.526316vh;
+		}
+		.randomM {
+			width: 30vh;
+			position: absolute;
+			display: flex;
+			top: 57%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.randomM img {
+			position: absoute;
+			top: 0;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			z-index: 2;
+			height: 30vh;
+		}
+		.inputframe {
+			position: absolute;
+			display: flex;
+			top: 40.965053%;
+			right: 0;
+			left: 0;
+			margin: auto;
+			z-index: 3;
+		}
+		.listen {
+			position: absolute;
+			display: flex;
+			top: 51.394947%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.listen img {
+			position: absoute;
+			top: 0;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			z-index: 2;
+			height: 3.924211vh;
+		}
+		.listen img:hover{
+			filter:drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+		}
+		.find {
+			width: 35.255368vh;
+			position: absolute;
+			display: flex;
+			top: 15.996%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.find img {
+			margin: auto;
+			z-index: 2;
+			height: 3.924211vh;
+			margin-left: 19.196211vh;
+		}
+		.find img:hover{
+			filter:drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+		}
+		.yourname {
+			width: 35.255368vh;
+			position: absolute;
+			display: flex;
+			top: 13%;
+			right: 0;
+			left: 2vh;
+			margin: auto;
+			text-align:left;
+			font-size: 2.308632vh;
+			font-family: Microsoft JhengHei;
+			color:#B23B34;
+			font-weight: bold;
+			z-index: 4;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+		.card {
+			position: absolute;
+			display: flex;
+			top: 19.467579%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.card img {
+			position: absoute;
+			top: 0;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			z-index: 2;
+			height: 68.002105vh;
+		}
+		.shift {
+			width: 25vh;
+			display: flex;
+			flex-direction: row;
+			position: absolute;
+			top: 14.123789%;
+			right: 0;
+			left: 0;
+			margin: auto;
+		}
+		.shift img {
+			position: absoute;
+			top: 0%;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			z-index: 2;
+			height: 4.475158vh;
+		}
+		.fadein {
+			-webkit -animation: fadeinout 1s linear forwards;
+			animation: fadeinout 1s linear forwards;
+		}
+		@-webkit-keyframes fadeinout {
+			0%{opacity: 0;}
+			50%{opacity: 0.5;}
+			100%{opacity: 1;}
+		}
+		@keyframes fadeinout {
+			0%{opacity: 0;}
+			50%{opacity: 0.5;}
+			100%{opacity: 1;}
+		}
+		.click{
+			opacity: 1;
+			filter: alpha(opacity=100);
+		}
+		.click:hover {
+			opacity: 0;
+			filter: alpha(opacity=0);
+		}
+		.clickQ4{
+		}
+		.clickQ4:hover{
+			filter:drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+		}
+		.inputlook {
+			position: absoute;
+			top: 0;
+			right: 0;
+			left: 0;
+			bottom: 0;
+			margin: auto;
+			width: 26.845053vh;
+			height: 4.201263vh;
+			border:none;
+			outline:none;
+			background-color:rgba(0,0,0,0);
+			text-align: center;
+			font-size:3vh;
+			font-weight: 500;
+			color:#B23B34;
+			font-family:Microsoft JhengHei;
+		}
+	</style>
+</head>
+<body>
+	<div id="page1" class="window" >
+		<img src="newyear2024_cover.png" class="windowbg">
+		<img onclick="showPage(2);ShowSecond(1,13,'12', ['b2','b1'])" src="newyear2024_lion.gif" class="windowlion">
+	</div>
+	<div id="page2" class="window">
+		<img id="text1" src="newyear2024_story1_01.png" class="windowbg">
+		<img id="text2" src="newyear2024_story1_02.png" class="windowbg fadein">
+		<img id="text3" src="newyear2024_story1_03.png" class="windowbg fadein">
+		<img id="text4" src="newyear2024_story1_04.png" class="windowbg fadein">
+		<img id="text5" src="newyear2024_story1_05.png" class="windowbg fadein">
+		<img id="text6" src="newyear2024_story1_06.png" class="windowbg fadein">
+		<img id="text7" src="newyear2024_story1_07.png" class="windowbg fadein">
+		<img id="text8" src="newyear2024_story1_08.png" class="windowbg fadein">
+		<img id="text9" src="newyear2024_story1_09.png" class="windowbg fadein">
+		<img id="text10" src="newyear2024_story1_10.png" class="windowbg fadein">
+		<img id="text11" src="newyear2024_story1_11.png" class="windowbg fadein">
+		<img id="text12" src="newyear2024_story1_12.png" class="windowbg fadein">
+		<img id="text13" src="newyear2024_story1_13.png" class="windowbg fadein">
+		<div id="button12bg" class="story">
+			<img src="newyear2024_button123_bg.gif"><img src="newyear2024_button123_bg.gif">
+		</div>
+		<div id="button12s" class="story">
+			<img src="newyear2024_button2s.png" class="fadein">
+			<img src="newyear2024_button1s.png" class="fadein">
+		</div>
+		<div id="button12" class="story">
+			<img id="b2" onclick="showPage(3);ShowSecond(14,31,'3', ['b3'])" src="newyear2024_button2.png" class="fadein">
+			<img id="b1" onclick="showPage(4)" src="newyear2024_button1.png" class="fadein">
+		</div>
+	</div>
+	<div id="page3" class="window">
+		<img id="text14" src="newyear2024_story2_01.png" class="windowbg">
+		<img id="text15" src="newyear2024_story2_02.png" class="windowbg fadein">
+		<img id="text16" src="newyear2024_story2_03.png" class="windowbg fadein">
+		<img id="text17" src="newyear2024_story2_04.png" class="windowbg fadein">
+		<img id="text18" src="newyear2024_story2_05.png" class="windowbg fadein">
+		<img id="text19" src="newyear2024_story2_06.png" class="windowbg fadein">
+		<img id="text20" src="newyear2024_story2_07.png" class="windowbg fadein">
+		<img id="text21" src="newyear2024_story2_08.png" class="windowbg fadein">
+		<img id="text22" src="newyear2024_story2_09.png" class="windowbg fadein">
+		<img id="text23" src="newyear2024_story2_10.png" class="windowbg fadein">
+		<img id="text24" src="newyear2024_story2_11.png" class="windowbg fadein">
+		<img id="text25" src="newyear2024_story2_12.png" class="windowbg fadein">
+		<img id="text26" src="newyear2024_story2_13.png" class="windowbg fadein">
+		<img id="text27" src="newyear2024_story2_14.png" class="windowbg fadein">
+		<img id="text28" src="newyear2024_story2_15.png" class="windowbg fadein">
+		<img id="text29" src="newyear2024_story2_16.png" class="windowbg fadein">
+		<img id="text30" src="newyear2024_story2_17.png" class="windowbg fadein">
+		<img id="text31" src="newyear2024_story2_18.png" class="windowbg fadein">
+		<div id="button3bg" class="story">
+			<img src="newyear2024_button123_bg.gif">
+		</div>
+		<div id="button3s" class="story">
+			<img src="newyear2024_button3s.png" class="fadein">
+		</div>
+		<div id="button3" class="story">
+			<img id="b3" onclick="showPage(4)" src="newyear2024_button3.png" class="fadein">
+		</div>
+	</div>
+	<div id="page4" class="window">
+		<img src="newyear2024_Q1.png" class="windowbg">
+		<div id="question1bg" class="option">
+			<img src="newyear2024_Q101bg.png">
+			<img src="newyear2024_Q102bg.png">
+			<img src="newyear2024_Q103bg.png">
+			<img src="newyear2024_Q104bg.png">
+		</div>
+		<div id="question1" class="option">
+			<img id="q101" onclick="add(4,2,2,4,2,2,1,3,4);showPage(5)" src="newyear2024_Q101.png" class="click">
+			<img id="q102" onclick="add(2,3,4,3,3,4,2,2,2);showPage(5)" src="newyear2024_Q102.png" class="click">
+			<img id="q103" onclick="add(1,4,3,1,1,3,4,1,1);showPage(5)" src="newyear2024_Q103.png" class="click">
+			<img id="q104" onclick="add(3,1,1,2,4,1,3,4,3);showPage(5)" src="newyear2024_Q104.png" class="click">
+		</div>
+	</div>
+	<div id="page5" class="window">
+		<img src="newyear2024_Q2.png" class="windowbg">
+		<div id="question2bg" class="option">
+			<img src="newyear2024_Q201bg.png">
+			<img src="newyear2024_Q202bg.png">
+			<img src="newyear2024_Q203bg.png">
+			<img src="newyear2024_Q204bg.png">
+		</div>
+		<div id="question2" class="option">
+			<img id="q201" onclick="add(4,4,1,3,1,1,1,3,3);showPage(6)" src="newyear2024_Q201.png" class="click">
+			<img id="q202" onclick="add(3,2,2,4,2,3,4,1,1);showPage(6)" src="newyear2024_Q202.png" class="click">
+			<img id="q203" onclick="add(2,3,3,1,3,2,2,4,2);showPage(6)" src="newyear2024_Q203.png" class="click">
+			<img id="q204" onclick="add(1,1,4,2,4,4,3,2,4);showPage(6)" src="newyear2024_Q204.png" class="click">
+		</div>
+	</div>
+	<div id="page6" class="window">
+		<img src="newyear2024_Q3.png" class="windowbg">
+		<div id="question3bg" class="option">
+			<img src="newyear2024_Q301bg.png">
+			<img src="newyear2024_Q302bg.png">
+			<img src="newyear2024_Q303bg.png">
+			<img src="newyear2024_Q304bg.png">
+		</div>
+		<div id="question3" class="option">
+			<img id="q301" onclick="add(2,4,3,4,4,3,2,1,1);showPage(7)" src="newyear2024_Q301.png" class="click">
+			<img id="q302" onclick="add(4,2,2,3,2,2,1,3,2);showPage(7)" src="newyear2024_Q302.png" class="click">
+			<img id="q303" onclick="add(3,1,1,1,3,1,4,4,3);showPage(7)" src="newyear2024_Q303.png" class="click">
+			<img id="q304" onclick="add(1,3,4,2,1,4,3,2,4);showPage(7)" src="newyear2024_Q304.png" class="click">
+		</div>
+	</div>
+	<div id="page7" class="window">
+		<img src="newyear2024_Q4.png" class="windowbg">
+		<div id="question4" class="option">
+			<img id="q401" onclick="add(1,4,4,3,1,3,2,1,3);showPage(8)" src="newyear2024_Q401.png" class="clickQ4">
+			<img id="q402" onclick="add(4,1,3,4,3,1,1,3,1);showPage(8)" src="newyear2024_Q402.png" class="clickQ4">
+			<img id="q403" onclick="add(3,2,1,1,4,2,3,4,4);showPage(8)" src="newyear2024_Q403.png" class="clickQ4">
+			<img id="q404" onclick="add(2,3,2,2,2,4,4,2,2);showPage(8)" src="newyear2024_Q404.png" class="clickQ4">
+		</div>
+	</div>
+	<div id="page8" class="window">
+		<img src="newyear2024_Q5.png" class="windowbg">
+		<div id="question5bg" class="option">
+			<img src="newyear2024_Q501bg.png">
+			<img src="newyear2024_Q502bg.png">
+			<img src="newyear2024_Q503bg.png">
+			<img src="newyear2024_Q504bg.png">
+		</div>
+		<div id="question5" class="option">
+			<img id="q501" onclick="add(1,3,1,3,2,4,2,1,4);showPage(9)" src="newyear2024_Q501.png" class="click">
+			<img id="q502" onclick="add(4,2,2,4,3,3,1,3,3);showPage(9)" src="newyear2024_Q502.png" class="click">
+			<img id="q503" onclick="add(2,1,4,1,1,2,4,4,2);showPage(9)" src="newyear2024_Q503.png" class="click">
+			<img id="q504" onclick="add(3,4,3,2,4,1,3,2,1);showPage(9)" src="newyear2024_Q504.png" class="click">
+		</div>
+	</div>
+	<div id="page9" class="window">
+		<img src="newyear2024_Q6.png" class="windowbg">
+		<div id="question6bg" class="option">
+			<img src="newyear2024_Q601bg.png">
+			<img src="newyear2024_Q602bg.png">
+			<img src="newyear2024_Q603bg.png">
+			<img src="newyear2024_Q604bg.png">
+		</div>
+		<div id="question6" class="option">
+			<img id="q601" onclick="add(1,3,1,1,4,3,4,4,3);showPage(10)" src="newyear2024_Q601.png" class="click">
+			<img id="q602" onclick="add(3,2,3,3,2,4,2,2,2);showPage(10)" src="newyear2024_Q602.png" class="click">
+			<img id="q603" onclick="add(2,1,4,2,3,1,3,1,1);showPage(10)" src="newyear2024_Q603.png" class="click">
+			<img id="q604" onclick="add(4,4,2,4,1,2,1,3,4);showPage(10)" src="newyear2024_Q604.png" class="click">
+		</div>
+	</div>
+	<div id="page10" class="window">
+		<img src="newyear2024_Q7.png" class="windowbg">
+		<div id="question7bg" class="option">
+			<img src="newyear2024_Q701bg.png">
+			<img src="newyear2024_Q702bg.png">
+			<img src="newyear2024_Q703bg.png">
+			<img src="newyear2024_Q704bg.png">
+		</div>
+		<div id="question7" class="option">
+			<img id="q701" onclick="add(3,4,2,3,3,4,4,4,3);showPage(11)" src="newyear2024_Q701.png" class="click">
+			<img id="q702" onclick="add(2,2,4,2,2,1,2,2,1);showPage(11)" src="newyear2024_Q702.png" class="click">
+			<img id="q703" onclick="add(4,1,3,4,4,2,3,3,2);showPage(11)" src="newyear2024_Q703.png" class="click">
+			<img id="q704" onclick="add(1,3,1,1,1,3,1,1,4);showPage(11)" src="newyear2024_Q704.png" class="click">
+		</div>
+	</div>
+	<div id="page11" class="window">
+		<img src="newyear2024_input.png" class="windowbg">
+		<div class="randomM">
+			<img src="newyear2024_random.gif">
+		</div>
+		<div class="listen">
+			<img onclick="showResult()" src="newyear2024_listen.png">
+		</div>
+		<div class="inputframe">
+			<input id="player" placeholder="輸入姓名或暱稱" autofocus type="text" class="inputlook">
+		</div>
+	</div>
+	<div id="result1" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card1.png">
+		</div>
+		<div id="player1" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result2" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card2.png">
+		</div>
+		<div id="player2" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result3" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card3.png">
+		</div>
+		<div id="player3" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result4" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card4.png">
+		</div>
+		<div id="player4" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result5" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card5.png">
+		</div>
+		<div id="player5" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result6" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card6.png">
+		</div>
+		<div id="player6" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result7" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card7.png">
+		</div>
+		<div id="player7" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result8" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card8.png">
+		</div>
+		<div id="player8" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="result9" class="window">
+		<img src="newyear2024_result.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card9.png">
+		</div>
+		<div id="player9" class="yourname">
+			小英雄
+		</div>
+		<div class="find">
+			<img onclick="showPage(12)" src="newyear2024_find.png">
+		</div>
+	</div>
+	<div id="page12" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card1.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_19.png">
+			<img onclick="showPage(13)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page13" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card2.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(12)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_29.png">
+			<img onclick="showPage(14)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page14" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card3.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(13)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_39.png">
+			<img onclick="showPage(15)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page15" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card4.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(14)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_49.png">
+			<img onclick="showPage(16)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page16" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card5.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(15)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_59.png">
+			<img onclick="showPage(17)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page17" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card6.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(16)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_69.png">
+			<img onclick="showPage(18)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page18" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card7.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(17)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_79.png">
+			<img onclick="showPage(19)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page19" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card8.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(18)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_89.png">
+			<img onclick="showPage(20)" src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<div id="page20" class="window">
+		<img src="newyear2024_shift.png" class="windowbg">
+		<div class="card">
+			<img src="newyear2024_card9.png">
+		</div>
+		<div class="shift">
+			<img src="newyear2024_shiftLbg.png">
+			<img src="newyear2024_109.png">
+			<img src="newyear2024_shiftRbg.png">
+		</div>
+		<div class="shift">
+			<img onclick="showPage(19)" src="newyear2024_shiftL.png" class="click">
+			<img src="newyear2024_99.png">
+			<img src="newyear2024_shiftR.png" class="click">
+		</div>
+	</div>
+	<script>
+	  /* 頁面切換邏輯 */
+      function showPage(pageNumber) {
+		// 先隱藏所有頁面
+        var pages = document.querySelectorAll(".window");
+        for (var i = 0; i < pages.length; i++) {
+          pages[i].style.display = "none";
+        }
+        // 再顯示指定頁面
+        document.querySelector("#page" + pageNumber).style.display = "flex";
+      }
+      // 初始顯示第一個頁面
+	  function ShowSecond(start,end,divname,idname) {
+		var divDelay = document.getElementById("button"+divname);
+		var divDelaybg = document.getElementById("button"+divname+"bg");
+		var divDelays = document.getElementById("button"+divname+"s");
+		divDelay.style.display = "none";
+		divDelaybg.style.display = "none";
+		divDelays.style.display = "none";
+		for (var i = start+1; i < end+1; i++) {
+		  var divImg = document.getElementById("text" + i);
+          divImg.style.display = "none";
+        }
+		for (var j = start+1; j < end+1; j++) {
+          (function(j){
+			var divImg = document.getElementById("text" + j);
+		    setTimeout(function () {
+			divImg.style.display = "inline";
+		    }, 2000*(j-start-1));
+		  })(j);
+        }
+		setTimeout(function () {
+        divDelay.style.display = "flex";
+		divDelaybg.style.display = "flex";
+		divDelays.style.display = "flex";
+		}, (end-start)*2000);
+		setTimeout(function () {
+		for (var k = 0; k < idname.length; k++) {
+		  var b = document.getElementById(idname[k]);
+		  b.className = "click";
+        }
+		}, (end-start)*2000+1000);
+	  }
+	  function add(s1,s2,s3,s4,s5,s6,s7,s8,s9){
+		cha1=cha1+s1;
+		cha2=cha2+s2;
+		cha3=cha3+s3;
+		cha4=cha4+s4;
+		cha5=cha5+s5;
+		cha6=cha6+s6;
+		cha7=cha7+s7;
+		cha8=cha8+s8;
+		cha9=cha9+s9;
+	  }
+	  function getRandomInt(max) {
+		return Math.floor(Math.random() * max);
+	  }
+	  function showResult(){
+		var maxscore = 0;
+		var maxcha = "";
+		var resultall = [cha1,cha2,cha3,cha4,cha5,cha6,cha7,cha8,cha9];
+		for(var i = 1;i < 10; i++) {
+			if(maxscore<resultall[i-1]){
+				maxscore = resultall[i-1];
+				maxcha = i.toString();
+			}else if(maxscore==resultall[i-1]) {
+				maxcha = maxcha+i.toString();
+			}
+		}
+		var num=getRandomInt(maxcha.length);
+		var pageNumber = maxcha.charAt(num);
+		var pages = document.querySelectorAll(".window");
+        for (var j = 0; j < pages.length; j++) {
+          pages[j].style.display = "none";
+        }
+        // 再顯示指定頁面
+        document.querySelector("#result" + pageNumber).style.display = "flex";
+		var playername = document.getElementById("player").value;
+		if (playername!=""){
+		  document.getElementById("player1").innerHTML = playername;
+		  document.getElementById("player2").innerHTML = playername;
+		  document.getElementById("player3").innerHTML = playername;
+		  document.getElementById("player4").innerHTML = playername;
+		  document.getElementById("player5").innerHTML = playername;
+		  document.getElementById("player6").innerHTML = playername;
+		  document.getElementById("player7").innerHTML = playername;
+		  document.getElementById("player8").innerHTML = playername;
+		  document.getElementById("player9").innerHTML = playername;
+		}
+	  }
+	  var cha1=0,cha2=0,cha3=0,cha4=0,cha5=0,cha6=0,cha7=0,cha8=0,cha9=0;
+      showPage(1);
+    </script>
+</body>
+</html>
