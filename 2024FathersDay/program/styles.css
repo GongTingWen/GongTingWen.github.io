@@ -1,0 +1,324 @@
+body {
+	margin: 0;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #fcf1e3;
+	font-family: Century-Gothic, CircularSp,CircularSp-Arab,CircularSp-Hebr,CircularSp-Cyrl,CircularSp-Grek,CircularSp-Deva,Helvetica Neue,helvetica,arial,Microsoft JhengHei,PingFang TC,Lantinghei TC,Hiragino Kaku Gothic ProN,Meiryo,MS Gothic;
+}
+
+#page1, #page2, #page3 {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#page2, #page3 {
+	position: relative;
+	height: 100vh;
+	justify-content: space-between;
+}
+
+#title {
+	height: 12vh;
+	width: 36vh;
+	background-image: url("../picture/title.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#cover {
+	height: 70vh;
+	width: 56vh;
+	background-image: url("../picture/cover.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#playBtn {
+	height: 7.5vh;
+	width: 25vh;
+	background-image: url("../picture/play.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 80%;
+}
+
+#playBtn:hover {
+	cursor: pointer;
+	background-size: 100%;
+}
+
+#rule, #ruleH {
+	margin-top: 4vh;
+	margin-bottom: 2vh;
+	width: 90vmin;
+	text-align: center;
+	font-size: 4vh;
+}
+
+#turn, #turnH {
+	height: 9vh;
+	width: 30vh;
+	background-image: url("../picture/yourturn.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#catNum, #catNumH {
+	width: 90vmin;
+	text-align: center;
+	font-size: 16vh;
+	-webkit-text-stroke: 0.5vh #ff3399;
+    color: white;
+	font-weight: bold;
+}
+
+#box, #boxH {
+	height: 60vh;
+	width: 48vh;
+	background-image: url("../picture/box.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#clickme, #catCount, #hand, #btn, #clickmeH, #catCountH, #handH, #btnH {
+	position: absolute;
+}
+
+#catCount, #catCountH {
+	top: 50vh;
+	left: calc(50% + 10vh);
+	height: 9vh;
+	width: 9vh;
+	border-radius: 4.5vh;
+	border: none;
+	background: radial-gradient(ellipse at center, #e83828 0%,#ea5514 20%,#e60012 100%);
+	color: #ffffff;
+	font-size: 6vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#clickme, #clickmeH {
+	top: 45vh;
+	left: calc(50% - 25vh);
+	height: 9vh;
+	width: 30vh;
+	background-image: url("../picture/clickme.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#hand, #handH {
+	top: 45vh;
+	left: calc(50% - 7.5vh);
+	height: 15vh;
+	width: 15vh;
+	background-image: url("../picture/hand-1.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#cat, #catH {
+	height: 100%;
+	width: 100%;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#cat:hover, #catH:hover {
+	cursor: pointer;
+}
+
+#backBtn, #backBtnH {
+	height: 12vh;
+	width: 12vh;
+	background-image: url("../picture/back.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 125%;
+}
+
+#okBtn, #okBtnH {
+	height: 12vh;
+	width: 12vh;
+	background-image: url("../picture/ok.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 125%;
+}
+
+#againBtn {
+	height: 7.5vh;
+	width: 25vh;
+	background-image: url("../picture/again.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#secretBtn {
+	height: 7.5vh;
+	width: 25vh;
+	background-image: url("../picture/secret.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#backBtn:hover, #okBtn:hover, #againBtn:hover, #secretBtn:hover, #backBtnH:hover, #okBtnH:hover {
+	cursor: pointer;
+}
+
+#btn, #btnH {
+	width: 90vmin;
+	bottom: 0;
+	margin-bottom: 4vh;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#hintBox1, #hintBox2, #hintBox3, #hintBox4, #hintBox5 {
+	position: absolute;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	background-color: rgba(0, 0, 0, 0.8);
+	color: #ffffff;
+	max-width: 60vmin;
+	border-radius: 10px;
+	gap: 2vh;
+}
+
+#hintBox1 {
+	top: 16vh;
+	left: auto;
+	right: auto;
+}
+
+#hintBox2 {
+	top: 75vh;
+	left: auto;
+	right: auto;
+}
+
+#hintBox3 {
+	bottom: 4vh;
+	left: 14vh;
+}
+
+#hintBox4 {
+	top: 75vh;
+	left: auto;
+	right: auto;
+}
+
+#hintBox5 {
+	bottom: 4vh;
+	right: 14vh;
+}
+
+#hintBox1 div, #hintBox2 div, #hintBox3 div, #hintBox4 div, #hintBox5 div {
+	font-size: 3vh;
+	text-align: justify;
+}
+
+#hintBox1 div:nth-child(2):hover, #hintBox2 div:nth-child(2):hover, #hintBox3 div:nth-child(2):hover, #hintBox4 div:nth-child(2):hover, #hintBox5 div:nth-child(2):hover {
+	cursor: pointer;
+	color: #CCCCCC;
+}
+
+#lock {
+	height: 7.5vh;
+	width: 25vh;
+	background-image: url("../picture/lock.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#secret {
+	position: absolute;
+	left: auto;
+	right: auto;
+	top: calc(50% - 40vh - 5vmin);
+	height: 80vh;
+	width: 80vmin;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 5vmin;
+	background-color: #fcf1e3;
+	border-radius: 20px;
+	gap: 5vmin;
+	border: solid 0.6vh #ff6666;
+	animation: scale-change 0.5s forwards; 
+}
+
+#s2 {
+	height: 9vh;
+	width: 30vh;
+	background-image: url("../picture/key.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#s4 {
+	height: 9vh;
+	width: 30vh;
+	background-image: url("../picture/reason.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#s1, #s3, #s5, #s6 {
+	font-size: 3vh;
+	text-align: justify;
+}
+
+#s1, #s6 {
+	margin-top: 5vh;
+}
+
+#close {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 5vh;
+	width: 5vh;
+	margin: 5vmin;
+	background-image: url("../picture/close.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#close:hover {
+	cursor: pointer;
+}
+
+@keyframes scale-change {
+  from {
+	opacity: 0;
+    transform: scale(0);
+  }
+  to {
+	opacity: 1;
+    transform: scale(1);
+  }
+}
