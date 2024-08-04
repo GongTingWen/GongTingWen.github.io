@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Futures</title>
+	<link href="https://fonts.cdnfonts.com/css/digital-dismay" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+	<div>
+		<div id="shData">
+			<div class="title buy">Buy at</div>
+			<div id="bP" class="buy">---</div>
+			<div class="title sell">Sell at</div>
+			<div id="sP" class="sell">---</div>
+		</div>
+		<div class="outside">
+			<div class="sub">Trading guidance</div>
+			<div class="inside">
+				<input type="text" id="mode" placeholder="Buy or Sell"></input>
+				<input type="text" id="strike" placeholder="Price"></input>
+				<button id="submit1">Submit</button>
+				<button id="submit2" style="display: none">Cancel</button>
+			</div>
+		</div>
+		<div class="outside">
+			<div class="sub">Data update</div>
+			<div class="inside">
+				<input type="text" id="date" placeholder="Date"></input>
+				<input type="text" id="price" placeholder="Price"></input>
+				<button id="submit3">Submit</button>
+			</div>
+		</div>
+	</div>	
+	<script src="script.js"></script>
+</body>
+</html>
