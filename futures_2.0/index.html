@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Futures</title>
+	<style>
+		body {
+			width: 100vw;
+			height: 100vh;
+			margin: 0;
+			background-color: #c9d6d5;
+			display: flex;
+			justify-content: center;
+			align-items: center; 
+		}
+		
+		#shareData {
+			width: 96vmin;
+			height: 96vmin;
+			background-image: url("picture.jpg");
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+			display: flex;
+			justify-content: center;
+			align-items: center; 
+		}
+		
+		.text_field {
+			width: 57.6vmin;
+			height: 57.6vmin;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: center; 
+		}
+		
+		.title {
+			font-size: 6vmin;
+			color: white;
+			font-family: Arial;
+		}
+		
+		#bP {
+			font-size: 10vmin;
+			color: #a559a3;
+			font-family: Arial;
+			font-weight: bold;
+		}
+		
+		#sP {
+			font-size: 10vmin;
+			color: #f3965c;
+			font-family: Arial;
+			font-weight: bold;
+		}
+		
+	</style>
+	<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+	<div id="shareData">
+		<div class="text_field">
+			<div class="title">Buy at</div>
+			<div id="bP">-----</div>
+			<div class="title">Sell at</div>
+			<div id="sP">-----</div>
+		</div>
+	</div>
+	<script>
+		$.ajax({
+			type: "get",
+			url: "https://script.google.com/macros/s/AKfycbzZtXvXtRYsTBoo5y8F8sNot-93k8UY1Ao8NH4-5khg4KDb97KnBt_UfqWXn-gQFSFUWg/exec",
+			data: {
+				"state": 0,
+			},
+			dataType: "JSON",
+			success: function(response) {
+				$("#bP").text(Math.round(response.bPrice));
+				$("#sP").text(Math.round(response.sPrice));
+			},
+		});
+	</script>
+</body>
+</html>
