@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>郁婷的棒棒「大」撲滿</title>
+	<style>
+		body {
+			width: 100vw;
+			height: 100vh;
+			margin: 0;
+			background-color: #fadde9;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center; 
+			gap: 8vmin;
+			font-family: Arial;
+		}
+		
+		.button_3 {
+			width: 96vmin;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: start;
+			gap: 6vmin;
+		}
+		
+		.btn_1 {
+			display: flex;
+			flex-direction: row;
+			justify-content: start;
+			align-items: center; 
+			gap: 4vmin;
+		}
+		
+		.name {
+			font-size: 6vmin;
+			color: #e48196;
+			font-weight: bold;
+		}
+		
+		.btn {
+			font-size: 6vmin;
+			color: #e48196;
+			background-color: #edb7c5;
+			padding: 2vmin;
+			border-radius: 1vmin;
+			font-weight: bold;
+		}
+		
+		.btn:hover {
+			color: #fef3f2;
+			background-color: #e48196;
+			cursor: pointer;
+		}
+		
+		.coin {
+			width: 92vmin;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center; 
+			gap: 2vmin;
+			background-color: #fef3f2;
+			border-radius: 1vmin;
+			padding: 2vmin;
+		}
+
+		.result {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-evenly;
+			gap: 6vmin;
+			align-items: center; 
+		}
+		
+		.coin_p {
+			width: 18vmin;
+			height: 18vmin;
+			background-image: url("picture.jpg");
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+		}
+		
+		.number {
+			font-size: 15vmin;
+			color: #e48196;
+			font-weight: bold;
+		}
+	</style>
+	<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+	<div class="button_3">
+		<div class="btn_1">
+			<div class="name">郁婷棒棒</div>
+			<div class="btn">+1 Coin</div>
+		</div>
+		<div class="btn_1">
+			<div class="name">郁雯棒棒</div>
+			<div class="btn">+20 Coin</div>
+		</div>
+		<div class="btn_1">
+			<div class="name">別人棒棒</div>
+			<div class="btn">+30 Coin</div>
+		</div>
+	</div>
+	<div class="coin">
+		<div class="name">總儲蓄</div>
+		<div class="result">
+			<div class="coin_p"></div>
+			<div class="name">X</div>
+			<div class="number"></div>
+		</div>
+	</div>
+	<script>
+		$.ajax({
+			type: "get",
+			url: "https://script.google.com/macros/s/AKfycbxs1pbAXWPd3ucZTA7XGDtb_ltlD6i8rLerXZ6yc9u44yFaaEDPNgtelj0zQDZpUSxl0w/exec",
+			data: {
+				"state": "pig0",
+			},
+			dataType: "JSON",
+			success: function(response) {
+				$(".number").text(response.coinNum);
+			},
+		});
+		$(".btn").eq(0).on( "click", function() {
+			$.ajax({
+			type: "get",
+				url: "https://script.google.com/macros/s/AKfycbxs1pbAXWPd3ucZTA7XGDtb_ltlD6i8rLerXZ6yc9u44yFaaEDPNgtelj0zQDZpUSxl0w/exec",
+				data: {
+					"state": "pig",
+					"coinsAdd": 1,
+				},
+				dataType: "JSON",
+				success: function(response) {
+					$(".number").text(response.coinNum);
+				},
+			});
+		});
+		$(".btn").eq(1).on( "click", function() {
+			$.ajax({
+				type: "get",
+				url: "https://script.google.com/macros/s/AKfycbxs1pbAXWPd3ucZTA7XGDtb_ltlD6i8rLerXZ6yc9u44yFaaEDPNgtelj0zQDZpUSxl0w/exec",
+				data: {
+					"state": "pig",
+					"coinsAdd": 20,
+				},
+				dataType: "JSON",
+				success: function(response) {
+					$(".number").text(response.coinNum);
+				},
+			});
+		});
+		$(".btn").eq(2).on( "click", function() {
+			$.ajax({
+				type: "get",
+				url: "https://script.google.com/macros/s/AKfycbxs1pbAXWPd3ucZTA7XGDtb_ltlD6i8rLerXZ6yc9u44yFaaEDPNgtelj0zQDZpUSxl0w/exec",
+				data: {
+					"state": "pig",
+					"coinsAdd": 30,
+				},
+				dataType: "JSON",
+				success: function(response) {
+					$(".number").text(response.coinNum);
+				},
+			});
+		});
+	</script>
+</body>
+</html>
