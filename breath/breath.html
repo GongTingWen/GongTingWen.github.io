@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breath: Create your own 3D cartoon character from 2D picture</title>
+<meta http-equiv="content-type" content="text/html">
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+	<div id="head">
+		<div id="detection_btn" onclick="changePage(1)">Image</div>
+		<div id="animation_btn" onclick="changePage(2)">3D Model</div>
+	</div>
+	<div id="section1">
+		<div id="detection_section">
+			<label id="upload_section">
+				<input type="file" accept="image/*" id="loadImage" oninput="loadImg();">
+			</label>
+			<div id="preview_text">Preview</div>
+			<div id="preview_section">
+				<canvas id="canvas_image"></canvas>
+				<div class="parameter">
+					<div class="parameter_inp">Sensitivity(face): </br><input type="number" value="0" id="threshold" oninput="changeThreshold();"></div>
+					<div class="parameter_inp">Sensitivity(features): </br><input type="number" value="0" id="threshold_S" oninput="changeThreshold();"></div>
+					<div class="parameter_inp">Hair_threshold(lower): </br><input type="number" value="0" id="threshold_H" oninput="changeThreshold();"></div>
+					<div class="parameter_inp">Background_threshold(higher): </br><input type="number" value="0" id="threshold_B" oninput="changeThreshold();"></div>
+					<div class="parameter_inp">Gray_max_difference: </br><input type="number" value="0" id="threshold_G" oninput="changeThreshold();"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="section2">
+		<div id="animation_section">
+			<canvas id="canvas_animation"></canvas>
+		</div>
+		<div id="download_btn" onclick="down()">Download Model</div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r110/three.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/math/ConvexHull.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/geometries/ConvexGeometry.js"></script>
+	<script src="OBJExporter.js"></script>
+	<script>
+		// THREE.js 環境設定
+		const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas_animation'), antialias: true });
+		renderer.setClearColor(0x000000, 0);
+		const threeWidth = window.innerWidth * 0.6;
+		const threeHeight = window.innerWidth * 0.36;
+		renderer.setSize(threeWidth, threeHeight);
+
+		const scene = new THREE.Scene();
+		const camera = new THREE.PerspectiveCamera(45, threeWidth / threeHeight, 1, 1000);
+		camera.position.set(0, 600, 300);
+		camera.lookAt(0, 0, 300);
+		const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+		scene.add(new THREE.AmbientLight(0x999999));
+
+		const light1 = new THREE.DirectionalLight(0xffffff, 0.5);
+		light1.position.set(100, 100, 100);
+		scene.add(light1);
+		
+		const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+		light2.position.set(-100, 100, -100);
+		scene.add(light2);
+		
+		// 五官模型
+		let meshF = null;
+		let meshN = null;
+		let meshMT = null;
+		let meshMB = null;
+		let meshBL = null;
+		let meshBR = null;
+		let meshEL = null;
+		let meshER = null;
+		let meshEL_b = null;
+		let meshER_b = null;
+		
+		function animate() {
+			requestAnimationFrame(animate);
+			renderer.render(scene, camera);
+		}
+		animate();
+		
+		function rgbToHex(r, g, b) {
+			return "#" + [r, g, b]
+				.map(c => c.toString(16).padStart(2, "0"))
+				.join("");
+		}
+		
+		// 全域變數
+		var noseZ = 0;
+		var mouthZ = [];
+		var browLZ = [];
+		var browRZ = [];
+		var eyeLZ = [];
+		var eyeRZ = [];
+		var r_f = 0;
+		var g_f = 0;
+		var b_f = 0;
+		
+		// Face Model
+		function modelF(b) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			for (var j = l_n[0][1]; j < (l_n[6][1]+1); j++) {
+				var b_2 = (6/9)*(((l_n[6][1]-l_n[0][1])/2)**2-(j-((l_n[6][1]+l_n[0][1])/2))**2);
+				b_2_list.push(b_2);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			mouthZ = [];
+			browLZ = [];
+			browRZ = [];
+			eyeLZ = [];
+			eyeRZ = [];
+			for (var j = l_n[0][1]; j < (l_n[6][1]+1); j++) {
+				var a = 0;
+				for (let i = 0; i < w; i++) {
+					if (mask[j * w + i] === 1) {
+						a += 1;
+					}
+				}
+				a = Math.floor(a / 2);
+				var a_2 = a**2;
+				for (let i = -a; i < a + 1; i++) {
+					var zh = Math.sqrt(b_2_list[j-l_n[0][1]]*(1-((i**2)/a_2)));
+					if ((j==nose[1][1]) && (i == 0)) {
+						noseZ = zh;
+					}
+					if ((j==mouth_top[7][1]) && (i >= -Math.ceil((mouth[6][0]-mouth[0][0])/2)) && (i <= Math.ceil((mouth[6][0]-mouth[0][0])/2))) {
+						mouthZ.push(zh);
+					}
+					if ((j==browL[0][1]) && (i >= -Math.ceil(face[0][0] - browL[0][0])) && (i <= -Math.ceil(face[0][0]-browL[3][0]))) {
+						browLZ.push(zh);
+					}
+					if ((j==browR[0][1]) && (i >= Math.ceil(browR[3][0]-face[0][0])) && (i <= Math.ceil(browR[0][0]-face[0][0]))) {
+						browRZ.push(zh);
+					}
+					if ((j==eyeL[0][1]) && (i >= -Math.ceil(face[0][0] - eyeL[0][0])) && (i <= -Math.ceil(face[0][0]-eyeL[3][0]))) {
+						eyeLZ.push(zh);
+					}
+					if ((j==eyeR[0][1]) && (i >= Math.ceil(eyeR[3][0]-face[0][0])) && (i <= Math.ceil(eyeR[0][0]-face[0][0]))) {
+						eyeRZ.push(zh);
+					}
+					topPoints.push(new THREE.Vector3(i,(j-l_n[0][1]),zh));
+					bottomPoints.push(new THREE.Vector3(i,(j-l_n[0][1]),-zh));
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+		
+			var countt = 0;
+			for (var i = (browL[3][0] + 1); i < browR[3][0]; i++) {
+				for (var j = (browL[3][1] + 5); j < (browL[3][1] + 15); j++) {
+					r_f += colorRGB[j*w+i][0];
+					g_f += colorRGB[j*w+i][1];
+					b_f += colorRGB[j*w+i][2];
+					countt += 1;
+				}
+			}
+			r_f = Math.round(r_f / countt);
+			g_f = Math.round(g_f / countt);
+			b_f = Math.round(b_f / countt);
+		  
+			var hexx = rgbToHex(r_f, g_f, b_f);
+			const material = new THREE.MeshStandardMaterial({
+				color: hexx,
+				side: THREE.DoubleSide,
+				roughness: 0.8,
+				metalness: 0.1,
+				flatShading: false
+			});
+
+			if (meshF) {
+				scene.remove(meshF);
+				meshF.geometry.dispose();
+				meshF.material.dispose();
+				scene.remove(meshN);
+				meshN.geometry.dispose();
+				meshN.material.dispose();
+				scene.remove(meshMT);
+				meshMT.geometry.dispose();
+				meshMT.material.dispose();
+				scene.remove(meshMB);
+				meshMB.geometry.dispose();
+				meshMB.material.dispose();
+				scene.remove(meshBL);
+				meshBL.geometry.dispose();
+				meshBL.material.dispose();
+				scene.remove(meshBR);
+				meshBR.geometry.dispose();
+				meshBR.material.dispose();
+				scene.remove(meshEL);
+				meshEL.geometry.dispose();
+				meshEL.material.dispose();
+				scene.remove(meshER);
+				meshER.geometry.dispose();
+				meshER.material.dispose();
+				scene.remove(meshEL_b);
+				meshEL_b.geometry.dispose();
+				meshEL_b.material.dispose();
+				scene.remove(meshER_b);
+				meshER_b.geometry.dispose();
+				meshER_b.material.dispose();
+			}
+
+			meshF = new THREE.Mesh(finalGeometry, material);
+			meshF.rotation.x = -Math.PI/2;
+			meshF.rotation.z = Math.PI;
+			scene.add(meshF);
+		}
+		
+		// Nose Model
+		function modelN(b) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			for (var j = l_n[1][1]; j < (l_n[3][1]+1); j++) {
+				var b_2 = (5*((l_n[3][1] - j)/(1+Math.exp(0.1*(l_n[3][1] - j - 5)))))**2;
+				b_2_list.push(b_2);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			
+			for (var j = l_n[1][1]; j < (l_n[3][1]+1); j++) {
+				var a = 0;
+				for (let i = 0; i < w; i++) {
+					if (mask[j * w + i] === 1) {
+						a += 1;
+					}
+				}
+				a = Math.floor(a / 2);
+				var a_2 = a**2;
+				for (let i = -a; i < a + 1; i++) {
+					var zh = Math.sqrt(b_2_list[j-l_n[1][1]]*(1-((i**2)/a_2)));
+					topPoints.push(new THREE.Vector3(i,(j-face[0][1]),(zh+noseZ-(Math.abs(i)**0.25)*2)));
+					bottomPoints.push(new THREE.Vector3(i,(j-face[0][1]),(-zh+noseZ)));
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+			
+			var r_f2 = Math.round(Math.min(r_f * 1.1,255));
+		  
+			var hexx = rgbToHex(r_f2, g_f, b_f);
+			const material = new THREE.MeshStandardMaterial({
+				color: hexx,
+				side: THREE.DoubleSide,
+				roughness: 0.8,
+				metalness: 0.1,
+				flatShading: false
+			});
+
+			meshN = new THREE.Mesh(finalGeometry, material);
+			meshN.rotation.x = -Math.PI/2;
+			meshN.rotation.z = Math.PI;
+			scene.add(meshN);
+		}
+		
+		// Mouth Model
+		function modelM(b,num) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			var a_list = [];
+			var starM_list = [];
+			var m_min = h;
+			var m_max = 0;
+			for (var j = l_n[0][0]; j < (l_n[6][0]+1); j++) {
+				if (num == 0) {
+					var b_2 = (1/9)*(((l_n[6][0]-l_n[0][0])/2)**2-(j-((l_n[6][0]+l_n[0][0])/2))**2);
+				} else {
+					var b_2 = (1/18)*(((l_n[6][0]-l_n[0][0])/2)**2-(j-((l_n[6][0]+l_n[0][0])/2))**2);
+				}
+				
+				b_2_list.push(b_2);
+				var a = 0;
+				var starM = 0;
+				for (let i = 0; i < h; i++) {
+					if (mask[i * w + j] === 1) {
+						a += 1;
+						if (starM == 0) {
+							starM = i;
+							if (starM < m_min) {
+								m_min = starM;
+							}
+						}
+					} else {
+						if (starM != 0) {
+							if (i > m_max) {
+								m_max = i;
+							}
+							break;
+						}
+					}
+				}
+				a = Math.floor(a / 2);
+				a_list.push(a);
+				starM_list.push(starM);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			
+			for (var j = m_min; j < (m_max+1); j++) {
+				for (let i = l_n[0][0]; i < (l_n[6][0]+1); i++) {
+					if (mask[j * w + i] === 1) {
+						var a_2 = a_list[i-l_n[0][0]]**2;
+						var zh = Math.sqrt(b_2_list[i-l_n[0][0]]*(1-(((j-(starM_list[i-l_n[0][0]]+a_list[i-l_n[0][0]]))**2)/a_2)));
+						topPoints.push(new THREE.Vector3((i-(l_n[0][0]+l_n[6][0])/2),(j-face[0][1]),(zh+mouthZ[i-l_n[0][0]])));
+						bottomPoints.push(new THREE.Vector3((i-(l_n[0][0]+l_n[6][0])/2),(j-face[0][1]),(-zh+mouthZ[i-l_n[0][0]])));
+					}
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+		  
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+			
+			var r_f_M = 0;
+			var g_f_M = 0;
+			var b_f_M = 0;
+			var countt = 0;
+			for (var i = 0; i < (w+1); i++) {
+				for (var j = 0; j < (h+1); j++) {
+					if (mask[j*w+i] == 1) {
+						r_f_M += colorRGB[j*w+i][0];
+						g_f_M += colorRGB[j*w+i][1];
+						b_f_M += colorRGB[j*w+i][2];
+						countt += 1;
+					}
+				}
+			}
+			r_f_M = Math.round(r_f_M / countt);
+			g_f_M = Math.round(g_f_M / countt);
+			b_f_M = Math.round(b_f_M / countt);
+		  
+			var hexx = rgbToHex(r_f_M, g_f_M, b_f_M);
+			const material = new THREE.MeshStandardMaterial({
+				color: hexx,
+				side: THREE.DoubleSide,
+				roughness: 0.5,
+				metalness: 0.1,
+				flatShading: false
+			});
+		
+			if (num == 0) {
+				meshMT = new THREE.Mesh(finalGeometry, material);
+				meshMT.rotation.x = -Math.PI/2;
+				meshMT.rotation.z = Math.PI;
+				scene.add(meshMT);
+			} else {
+				meshMB = new THREE.Mesh(finalGeometry, material);
+				meshMB.rotation.x = -Math.PI/2;
+				meshMB.rotation.z = Math.PI;
+				scene.add(meshMB);
+			}
+		}
+		
+		// browL Model
+		function modelBL(b) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			var a_list = [];
+			var starB_list = [];
+			var b_min = h;
+			var b_max = 0;
+			for (var j = l_n[0][0]; j < (l_n[3][0]+1); j++) {
+				var b_2 = (1/18)*(((l_n[3][0]-l_n[0][0])/2)**2-(j-((l_n[3][0]+l_n[0][0])/2))**2);
+				b_2_list.push(b_2);
+				var a = 0;
+				var starB = 0;
+				for (let i = 0; i < h; i++) {
+					if (mask[i * w + j] === 1) {
+						a += 1;
+						if (starB == 0) {
+							starB = i;
+							if (starB < b_min) {
+								b_min = starB;
+							}
+						}
+					} else {
+						if (starB != 0) {
+							if (i > b_max) {
+								b_max = i;
+							}
+							break;
+						}
+					}
+				}
+				a = Math.floor(a / 2);
+				a_list.push(a);
+				starB_list.push(starB);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			
+			for (var j = b_min; j < (b_max+1); j++) {
+				for (let i = l_n[0][0]; i < (l_n[3][0]+1); i++) {
+					if (mask[j * w + i] === 1) {
+						var a_2 = a_list[i-l_n[0][0]]**2;
+						var zh = Math.sqrt(b_2_list[i-l_n[0][0]]*(1-(((j-(starB_list[i-l_n[0][0]]+a_list[i-l_n[0][0]]))**2)/a_2)));
+						topPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(zh+browLZ[i-l_n[0][0]])));
+						bottomPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(-zh+browLZ[i-l_n[0][0]])));
+					}
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+		  
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+			
+			var r_f_M = 0;
+			var g_f_M = 0;
+			var b_f_M = 0;
+			var countt = 0;
+			for (var i = 0; i < (w+1); i++) {
+				for (var j = 0; j < (h+1); j++) {
+					if (mask[j*w+i] == 1) {
+						r_f_M += colorRGB[j*w+i][0];
+						g_f_M += colorRGB[j*w+i][1];
+						b_f_M += colorRGB[j*w+i][2];
+						countt += 1;
+					}
+				}
+			}
+			r_f_M = Math.round(r_f_M / countt);
+			g_f_M = Math.round(g_f_M / countt);
+			b_f_M = Math.round(b_f_M / countt);
+		  
+			var hexx = rgbToHex(r_f_M, g_f_M, b_f_M);
+			const material = new THREE.MeshStandardMaterial({
+				color: hexx,
+				side: THREE.DoubleSide,
+				roughness: 0.8,
+				metalness: 0.1,
+				flatShading: false
+			});
+	
+			meshBL = new THREE.Mesh(finalGeometry, material);
+			meshBL.rotation.x = -Math.PI/2;
+			meshBL.rotation.z = Math.PI;
+			scene.add(meshBL);
+		}
+		
+		// browR Model
+		function modelBR(b) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			var a_list = [];
+			var starB_list = [];
+			var b_min = h;
+			var b_max = 0;
+			for (var j = l_n[3][0]; j < (l_n[0][0]+1); j++) {
+				var b_2 = (1/18)*(((l_n[0][0]-l_n[3][0])/2)**2-(j-((l_n[0][0]+l_n[3][0])/2))**2);
+				b_2_list.push(b_2);
+				var a = 0;
+				var starB = 0;
+				for (let i = 0; i < h; i++) {
+					if (mask[i * w + j] === 1) {
+						a += 1;
+						if (starB == 0) {
+							starB = i;
+							if (starB < b_min) {
+								b_min = starB;
+							}
+						}
+					} else {
+						if (starB != 0) {
+							if (i > b_max) {
+								b_max = i;
+							}
+							break;
+						}
+					}
+				}
+				a = Math.floor(a / 2);
+				a_list.push(a);
+				starB_list.push(starB);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			
+			for (var j = b_min; j < (b_max+1); j++) {
+				for (let i = l_n[3][0]; i < (l_n[0][0]+1); i++) {
+					if (mask[j * w + i] === 1) {
+						var a_2 = a_list[i-l_n[3][0]]**2;
+						var zh = Math.sqrt(b_2_list[i-l_n[3][0]]*(1-(((j-(starB_list[i-l_n[3][0]]+a_list[i-l_n[3][0]]))**2)/a_2)));
+						topPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(zh+browRZ[i-l_n[3][0]])));
+						bottomPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(-zh+browRZ[i-l_n[3][0]])));
+					}
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+		  
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+			
+			var r_f_M = 0;
+			var g_f_M = 0;
+			var b_f_M = 0;
+			var countt = 0;
+			for (var i = 0; i < (w+1); i++) {
+				for (var j = 0; j < (h+1); j++) {
+					if (mask[j*w+i] == 1) {
+						r_f_M += colorRGB[j*w+i][0];
+						g_f_M += colorRGB[j*w+i][1];
+						b_f_M += colorRGB[j*w+i][2];
+						countt += 1;
+					}
+				}
+			}
+			r_f_M = Math.round(r_f_M / countt);
+			g_f_M = Math.round(g_f_M / countt);
+			b_f_M = Math.round(b_f_M / countt);
+		  
+			var hexx = rgbToHex(r_f_M, g_f_M, b_f_M);
+			const material = new THREE.MeshStandardMaterial({
+				color: hexx,
+				side: THREE.DoubleSide,
+				roughness: 0.8,
+				metalness: 0.1,
+				flatShading: false
+			});
+	
+			meshBR = new THREE.Mesh(finalGeometry, material);
+			meshBR.rotation.x = -Math.PI/2;
+			meshBR.rotation.z = Math.PI;
+			scene.add(meshBR);
+		}
+		
+		// eyeL Model
+		function modelEL(b) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			var a_list = [];
+			var starE_list = [];
+			var e_min = h;
+			var e_max = 0;
+			for (var j = l_n[0][0]; j < (l_n[3][0]+1); j++) {
+				var b_2 = (1/36)*(((l_n[3][0]-l_n[0][0])/2)**2-(j-((l_n[3][0]+l_n[0][0])/2))**2);
+				b_2_list.push(b_2);
+				var a = 0;
+				var starE = 0;
+				for (let i = 0; i < h; i++) {
+					if (mask[i * w + j] === 1) {
+						a += 1;
+						if (starE == 0) {
+							starE = i;
+							if (starE < e_min) {
+								e_min = starE;
+							}
+						}
+					} else {
+						if (starE != 0) {
+							if (i > e_max) {
+								e_max = i;
+							}
+							break;
+						}
+					}
+				}
+				a = Math.floor(a / 2);
+				a_list.push(a);
+				starE_list.push(starE);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			
+			const topPoints_b = [];
+			const bottomPoints_b = [];
+			
+			var circle_x = Math.floor((l_n[3][0] + l_n[0][0])/2);
+			var circle_y = Math.floor((l_n[5][1] + l_n[1][1])/2);
+			var circle_r = Math.floor((e_max - e_min)/2);
+			for (var j = e_min; j < (e_max+1); j++) {
+				for (let i = l_n[0][0]; i < (l_n[3][0]+1); i++) {
+					if (mask[j * w + i] === 1) {
+						var a_2 = a_list[i-l_n[0][0]]**2;
+						var zh = Math.sqrt(b_2_list[i-l_n[0][0]]*(1-(((j-(starE_list[i-l_n[0][0]]+a_list[i-l_n[0][0]]))**2)/a_2)));
+						topPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(zh+eyeLZ[i-l_n[0][0]])));
+						bottomPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(-zh+eyeLZ[i-l_n[0][0]])));
+						if (((i-circle_x)**2+(j-circle_y)**2) <= circle_r**2) {
+							topPoints_b.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(1+zh+eyeLZ[i-l_n[0][0]])));
+							bottomPoints_b.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(-1-zh+eyeLZ[i-l_n[0][0]])));
+						}
+					}
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+			const allPoints_b = topPoints_b.concat(bottomPoints_b);
+		  
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+		  
+			const finalGeometry_b = new THREE.ConvexGeometry(allPoints_b);
+			finalGeometry_b.computeFaceNormals();
+			finalGeometry_b.computeVertexNormals();
+			
+			const material = new THREE.MeshStandardMaterial({
+				color: "#ffffff",
+				side: THREE.DoubleSide,
+				roughness: 0.3,
+				metalness: 0.1,
+				flatShading: false
+			});
+		  
+			const material_b = new THREE.MeshStandardMaterial({
+				color: "#6D5849",
+				side: THREE.DoubleSide,
+				roughness: 0.3,
+				metalness: 0.1,
+				flatShading: false
+			});
+	
+			meshEL = new THREE.Mesh(finalGeometry, material);
+			meshEL.rotation.x = -Math.PI/2;
+			meshEL.rotation.z = Math.PI;
+			scene.add(meshEL);
+		  
+			meshEL_b = new THREE.Mesh(finalGeometry_b, material_b);
+			meshEL_b.rotation.x = -Math.PI/2;
+			meshEL_b.rotation.z = Math.PI;
+			scene.add(meshEL_b);
+		}
+		
+		// eyeR Model
+		function modelER(b) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			var l_n = b;
+			canvas.width = w;
+			canvas.height = h;
+			var all_points = [];
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			for (let i = 0; i < l_n.length; i++) {
+				const p0 = l_n[(i - 1 + l_n.length) % l_n.length];
+				const p1 = l_n[i];
+				const p2 = l_n[(i + 1) % l_n.length];
+				const p3 = l_n[(i + 2) % l_n.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					var [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					all_points.push([x, y]);
+				}
+			}
+
+			const mask = new Uint8Array(w * h);
+			ctx.clearRect(0, 0, w, h);
+			ctx.beginPath();
+			ctx.moveTo(all_points[0][0], all_points[0][1]);
+			for (let i = 1; i < all_points.length; i++) ctx.lineTo(all_points[i][0], all_points[i][1]);
+			ctx.closePath();
+			ctx.fillStyle = 'black';
+			ctx.fill();
+
+			const imageData = ctx.getImageData(0, 0, w, h).data;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					const idx = (y * w + x) * 4;
+					if (imageData[idx + 3] > 128) mask[y * w + x] = 1;
+				}
+			}
+			
+			var b_2_list = [];
+			var a_list = [];
+			var starE_list = [];
+			var e_min = h;
+			var e_max = 0;
+			for (var j = l_n[3][0]; j < (l_n[0][0]+1); j++) {
+				var b_2 = (1/36)*(((l_n[0][0]-l_n[3][0])/2)**2-(j-((l_n[0][0]+l_n[3][0])/2))**2);
+				b_2_list.push(b_2);
+				var a = 0;
+				var starE = 0;
+				for (let i = 0; i < h; i++) {
+					if (mask[i * w + j] === 1) {
+						a += 1;
+						if (starE == 0) {
+							starE = i;
+							if (starE < e_min) {
+								e_min = starE;
+							}
+						}
+					} else {
+						if (starE != 0) {
+							if (i > e_max) {
+								e_max = i;
+							}
+							break;
+						}
+					}
+				}
+				a = Math.floor(a / 2);
+				a_list.push(a);
+				starE_list.push(starE);
+			}
+			
+			const topPoints = [];
+			const bottomPoints = [];
+			
+			const topPoints_b = [];
+			const bottomPoints_b = [];
+			
+			var circle_x = Math.floor((l_n[3][0] + l_n[0][0])/2);
+			var circle_y = Math.floor((l_n[5][1] + l_n[1][1])/2);
+			var circle_r = Math.floor((e_max - e_min)/2);
+			for (var j = e_min; j < (e_max+1); j++) {
+				for (let i = l_n[3][0]; i < (l_n[0][0]+1); i++) {
+					if (mask[j * w + i] === 1) {
+						var a_2 = a_list[i-l_n[3][0]]**2;
+						var zh = Math.sqrt(b_2_list[i-l_n[3][0]]*(1-(((j-(starE_list[i-l_n[3][0]]+a_list[i-l_n[3][0]]))**2)/a_2)));
+						topPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(zh+eyeRZ[i-l_n[3][0]])));
+						bottomPoints.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(-zh+eyeRZ[i-l_n[3][0]])));
+						if (((i-circle_x)**2+(j-circle_y)**2) <= circle_r**2) {
+							topPoints_b.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(1+zh+eyeRZ[i-l_n[3][0]])));
+							bottomPoints_b.push(new THREE.Vector3((i-face[0][0]),(j-face[0][1]),(-1-zh+eyeRZ[i-l_n[3][0]])));
+						}
+					}
+				}
+			}
+			
+			const allPoints = topPoints.concat(bottomPoints);
+			const allPoints_b = topPoints_b.concat(bottomPoints_b);
+		  
+			const finalGeometry = new THREE.ConvexGeometry(allPoints);
+			finalGeometry.computeFaceNormals();
+			finalGeometry.computeVertexNormals();
+		  
+			const finalGeometry_b = new THREE.ConvexGeometry(allPoints_b);
+			finalGeometry_b.computeFaceNormals();
+			finalGeometry_b.computeVertexNormals();
+			
+			const material = new THREE.MeshStandardMaterial({
+				color: "#ffffff",
+				side: THREE.DoubleSide,
+				roughness: 0.3,
+				metalness: 0.1,
+				flatShading: false
+			});
+		  
+			const material_b = new THREE.MeshStandardMaterial({
+				color: "#6D5849",
+				side: THREE.DoubleSide,
+				roughness: 0.3,
+				metalness: 0.1,
+				flatShading: false
+			});
+	
+			meshER = new THREE.Mesh(finalGeometry, material);
+			meshER.rotation.x = -Math.PI/2;
+			meshER.rotation.z = Math.PI;
+			scene.add(meshER);
+		  
+			meshER_b = new THREE.Mesh(finalGeometry_b, material_b);
+			meshER_b.rotation.x = -Math.PI/2;
+			meshER_b.rotation.z = Math.PI;
+			scene.add(meshER_b);
+		}
+		
+		// 特徵點位置
+		var browL = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var browR = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var eyeL = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var eyeR = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var nose = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var mouth = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var face = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var mouth_top = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		var mouth_bottom = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+		
+		// 找出 face 特徵點
+		function control_point_f(d) {
+			var data = d;
+			
+			// face
+			for (var j = 3; j < (h - 3); j++) {
+				if (data[(j*w+Math.floor((rightest + leftest)/2))*4]==255) {
+					face[0][0] = Math.floor((rightest + leftest)/2);
+					face[0][1] = j;
+					break;
+				}
+			}
+			for (var j = (h - 4); j > 2; j--) {
+				if (data[(j*w+Math.floor((rightest + leftest)/2))*4]==255) {
+					face[6][0] = Math.floor((rightest + leftest)/2);
+					face[6][1] = j;
+					break;
+				}
+			}
+			var face1 = 0;
+			var face2 = 0;
+			var face3 = 0;
+			var face4 = 0;
+			var face5 = 0;
+			var face7 = 0;
+			var face8 = 0;
+			var face9 = 0;
+			var face10 = 0;
+			var face11 = 0;
+			for (var j = leftest; j < rightest + 1; j++) {
+				if (data[(Math.ceil(face[0][1]*5/6+face[6][1]*1/6)*w+j)*4]==255) {
+					if (face1 != 1) {
+						face[1][0] = j;
+						face[1][1] = Math.ceil(face[0][1]*5/6+face[6][1]*1/6);
+						face1 = 1;
+					}
+				}
+				if (data[(Math.ceil(face[0][1]*4/6+face[6][1]*2/6)*w+j)*4]==255) {
+					if (face2 != 1) {
+						face[2][0] = j;
+						face[2][1] = Math.ceil(face[0][1]*4/6+face[6][1]*2/6);
+						face2 = 1;
+					}
+				}
+				if (data[(Math.ceil(face[0][1]*3/6+face[6][1]*3/6)*w+j)*4]==255) {
+					if (face3 != 1) {
+						face[3][0] = j;
+						face[3][1] = Math.ceil(face[0][1]*3/6+face[6][1]*3/6);
+						face3 = 1;
+					}
+				}
+				if (data[(Math.ceil(face[0][1]*2/6+face[6][1]*4/6)*w+j)*4]==255) {
+					if (face4 != 1) {
+						face[4][0] = j;
+						face[4][1] = Math.ceil(face[0][1]*2/6+face[6][1]*4/6);
+						face4 = 1;
+					}
+				}
+				if (data[(Math.ceil(face[0][1]*1/6+face[6][1]*5/6)*w+j)*4]==255) {
+					if (face5 != 1) {
+						face[5][0] = j;
+						face[5][1] = Math.ceil(face[0][1]*1/6+face[6][1]*5/6);
+						face5 = 1;
+					}
+				}
+			}
+			for (var j = rightest; j > leftest - 1; j--) {
+				if (data[(Math.floor(face[0][1]*5/6+face[6][1]*1/6)*w+j)*4]==255) {
+					if (face11 != 1) {
+						face[11][0] = j;
+						face[11][1] = Math.floor(face[0][1]*5/6+face[6][1]*1/6);
+						face11 = 1;
+					}
+				}
+				if (data[(Math.floor(face[0][1]*4/6+face[6][1]*2/6)*w+j)*4]==255) {
+					if (face10 != 1) {
+						face[10][0] = j;
+						face[10][1] = Math.floor(face[0][1]*4/6+face[6][1]*2/6);
+						face10 = 1;
+					}
+				}
+				if (data[(Math.floor(face[0][1]*3/6+face[6][1]*3/6)*w+j)*4]==255) {
+					if (face9 != 1) {
+						face[9][0] = j;
+						face[9][1] = Math.floor(face[0][1]*3/6+face[6][1]*3/6);
+						face9 = 1;
+					}
+				}
+				if (data[(Math.floor(face[0][1]*2/6+face[6][1]*4/6)*w+j)*4]==255) {
+					if (face8 != 1) {
+						face[8][0] = j;
+						face[8][1] = Math.floor(face[0][1]*2/6+face[6][1]*4/6);
+						face8 = 1;
+					}
+				}
+				if (data[(Math.floor(face[0][1]*1/6+face[6][1]*5/6)*w+j)*4]==255) {
+					if (face7 != 1) {
+						face[7][0] = j;
+						face[7][1] = Math.floor(face[0][1]*1/6+face[6][1]*5/6);
+						face7 = 1;
+					}
+				}
+			}
+		}
+		
+		// 找出五官特徵點
+		function control_point(d, t, b, l, r) {
+			var l_list = l;
+			var r_list = r;
+			var data = d;
+			
+			// eyeL + browL
+			var enter_eye = 0;
+			var all_line_black = 0;
+			var e_b_break_L = 0;
+			var b_top_L = 0;
+			outerLoop:
+			for (var i = face[3][1]; i > face[0][1]; i--) {
+				for (var j = Math.floor((rightest + leftest)/2); j > (l_list[i-3] + 10); j--) {
+					if (data[(i*w+j)*4]==255) {
+						all_line_black += 1;
+						if (enter_eye == 0) {
+							enter_eye = 1;
+						} else if (enter_eye == 2) {
+							enter_eye = 3;
+						}
+					}
+				}
+				if ((enter_eye == 1) && (all_line_black == 0)) {
+					e_b_break_L = i;
+					enter_eye = 2;
+				}
+				if ((enter_eye == 3) && (all_line_black == 0)) {
+					b_top_L = i;
+					break outerLoop;
+				}
+				all_line_black = 0;
+			}
+			
+			// browL
+			outerLoop:
+			for (var i = (l_list[b_top_L-3] + 15); i < Math.floor((rightest + leftest)/2); i++) {
+				for (var j = e_b_break_L; j > b_top_L; j--) {
+					if (data[(j*w+i)*4]==255) {
+						browL[0][0] = i;
+						browL[0][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			outerLoop:
+			for (var i = Math.floor((rightest + leftest)/2); i > (l_list[b_top_L-3] + 16); i--) {
+				for (var j = e_b_break_L; j > b_top_L; j--) {
+					if (data[(j*w+i)*4]==255) {
+						browL[3][0] = i;
+						browL[3][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			var browL1 = 0;
+			var browL2 = 0;
+			var browL4 = 0;
+			var browL5 = 0;
+			for (var j = b_top_L; j < e_b_break_L; j++) {
+				if (data[(j*w+Math.floor(browL[0][0]*2/3+browL[3][0]*1/3))*4]==255) {
+					if (browL1 != 1) {
+						browL[1][0] = Math.floor(browL[0][0]*2/3+browL[3][0]*1/3);
+						browL[1][1] = j;
+						browL1 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(browL[0][0]*1/3+browL[3][0]*2/3))*4]==255) {
+					if (browL2 != 1) {
+						browL[2][0] = Math.floor(browL[0][0]*1/3+browL[3][0]*2/3);
+						browL[2][1] = j;
+						browL2 = 1;
+					}
+				}
+			}
+			for (var j = e_b_break_L; j > b_top_L + 1; j--) {
+				if (data[(j*w+Math.floor(browL[0][0]*2/3+browL[3][0]*1/3))*4]==255) {
+					if (browL5 != 1) {
+						browL[5][0] = Math.floor(browL[0][0]*2/3+browL[3][0]*1/3);
+						browL[5][1] = j;
+						browL5 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(browL[0][0]*1/3+browL[3][0]*2/3))*4]==255) {
+					if (browL4 != 1) {
+						browL[4][0] = Math.floor(browL[0][0]*1/3+browL[3][0]*2/3);
+						browL[4][1] = j;
+						browL4 = 1;
+					}
+				}
+			}
+			
+			// eyeL
+			outerLoop:
+			for (var i = (l_list[e_b_break_L-3] + 15); i < Math.floor((rightest + leftest)/2); i++) {
+				for (var j = e_b_break_L; j < face[3][1]; j++) {
+					if (data[(j*w+i)*4]==255) {
+						eyeL[0][0] = i;
+						eyeL[0][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			outerLoop:
+			for (var i = Math.floor((rightest + leftest)/2); i > (l_list[e_b_break_L-3] + 16); i--) {
+				for (var j = e_b_break_L; j < face[3][1]; j++) {
+					if (data[(j*w+i)*4]==255) {
+						eyeL[3][0] = i;
+						eyeL[3][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			var eyeL1 = 0;
+			var eyeL2 = 0;
+			var eyeL4 = 0;
+			var eyeL5 = 0;
+			for (var j = e_b_break_L; j < face[3][1]; j++) {
+				if (data[(j*w+Math.floor(eyeL[0][0]*2/3+eyeL[3][0]*1/3))*4]==255) {
+					if (eyeL1 != 1) {
+						eyeL[1][0] = Math.floor(eyeL[0][0]*2/3+eyeL[3][0]*1/3);
+						eyeL[1][1] = j;
+						eyeL1 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(eyeL[0][0]*1/3+eyeL[3][0]*2/3))*4]==255) {
+					if (eyeL2 != 1) {
+						eyeL[2][0] = Math.floor(eyeL[0][0]*1/3+eyeL[3][0]*2/3);
+						eyeL[2][1] = j;
+						eyeL2 = 1;
+					}
+				}
+			}
+			for (var j = face[3][1]; j > e_b_break_L + 1; j--) {
+				if (data[(j*w+Math.floor(eyeL[0][0]*2/3+eyeL[3][0]*1/3))*4]==255) {
+					if (eyeL5 != 1) {
+						eyeL[5][0] = Math.floor(eyeL[0][0]*2/3+eyeL[3][0]*1/3);
+						eyeL[5][1] = j;
+						eyeL5 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(eyeL[0][0]*1/3+eyeL[3][0]*2/3))*4]==255) {
+					if (eyeL4 != 1) {
+						eyeL[4][0] = Math.floor(eyeL[0][0]*1/3+eyeL[3][0]*2/3);
+						eyeL[4][1] = j;
+						eyeL4 = 1;
+					}
+				}
+			}
+			
+			// eyeR + browR
+			enter_eye = 0;
+			all_line_black = 0;
+			var e_b_break_R = 0;
+			var b_top_R = 0;
+			outerLoop:
+			for (var i = face[3][1]; i > face[0][1]; i--) {
+				for (var j = (r_list[i-3] - 10); j > Math.floor((rightest + leftest)/2); j--) {
+					if (data[(i*w+j)*4]==255) {
+						all_line_black += 1;
+						if (enter_eye == 0) {
+							enter_eye = 1;
+						} else if (enter_eye == 2) {
+							enter_eye = 3;
+						}
+					}
+				}
+				if ((enter_eye == 1) && (all_line_black == 0)) {
+					e_b_break_R = i;
+					enter_eye = 2;
+				}
+				if ((enter_eye == 3) && (all_line_black == 0)) {
+					b_top_R = i;
+					break outerLoop;
+				}
+				all_line_black = 0;
+			}
+			
+			// browR
+			outerLoop:
+			for (var i = (r_list[b_top_R-3] - 15); i > Math.floor((rightest + leftest)/2); i--) {
+				for (var j = e_b_break_R; j > b_top_R; j--) {
+					if (data[(j*w+i)*4]==255) {
+						browR[0][0] = i;
+						browR[0][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			outerLoop:
+			for (var i = Math.floor((rightest + leftest)/2); i < (r_list[b_top_R-3] - 16); i++) {
+				for (var j = e_b_break_R; j > b_top_R; j--) {
+					if (data[(j*w+i)*4]==255) {
+						browR[3][0] = i;
+						browR[3][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			var browR1 = 0;
+			var browR2 = 0;
+			var browR4 = 0;
+			var browR5 = 0;
+			for (var j = b_top_R; j < e_b_break_R; j++) {
+				if (data[(j*w+Math.floor(browR[0][0]*2/3+browR[3][0]*1/3))*4]==255) {
+					if (browR1 != 1) {
+						browR[1][0] = Math.floor(browR[0][0]*2/3+browR[3][0]*1/3);
+						browR[1][1] = j;
+						browR1 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(browR[0][0]*1/3+browR[3][0]*2/3))*4]==255) {
+					if (browR2 != 1) {
+						browR[2][0] = Math.floor(browR[0][0]*1/3+browR[3][0]*2/3);
+						browR[2][1] = j;
+						browR2 = 1;
+					}
+				}
+			}
+			for (var j = e_b_break_R; j > b_top_R + 1; j--) {
+				if (data[(j*w+Math.floor(browR[0][0]*2/3+browR[3][0]*1/3))*4]==255) {
+					if (browR5 != 1) {
+						browR[5][0] = Math.floor(browR[0][0]*2/3+browR[3][0]*1/3);
+						browR[5][1] = j;
+						browR5 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(browR[0][0]*1/3+browR[3][0]*2/3))*4]==255) {
+					if (browR4 != 1) {
+						browR[4][0] = Math.floor(browR[0][0]*1/3+browR[3][0]*2/3);
+						browR[4][1] = j;
+						browR4 = 1;
+					}
+				}
+			}
+			
+			// eyeR
+			outerLoop:
+			for (var i = (r_list[e_b_break_R] - 15); i > Math.floor((rightest + leftest)/2); i--) {
+				for (var j = e_b_break_R; j < face[3][1]; j++) {
+					if (data[(j*w+i)*4]==255) {
+						eyeR[0][0] = i;
+						eyeR[0][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			outerLoop:
+			for (var i = Math.floor((rightest + leftest)/2); i < (r_list[e_b_break_R] - 16); i++) {
+				for (var j = e_b_break_R; j < face[3][1]; j++) {
+					if (data[(j*w+i)*4]==255) {
+						eyeR[3][0] = i;
+						eyeR[3][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			var eyeR1 = 0;
+			var eyeR2 = 0;
+			var eyeR4 = 0;
+			var eyeR5 = 0;
+			for (var j = e_b_break_R; j < face[3][1]; j++) {
+				if (data[(j*w+Math.floor(eyeR[0][0]*2/3+eyeR[3][0]*1/3))*4]==255) {
+					if (eyeR1 != 1) {
+						eyeR[1][0] = Math.floor(eyeR[0][0]*2/3+eyeR[3][0]*1/3);
+						eyeR[1][1] = j;
+						eyeR1 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(eyeR[0][0]*1/3+eyeR[3][0]*2/3))*4]==255) {
+					if (eyeR2 != 1) {
+						eyeR[2][0] = Math.floor(eyeR[0][0]*1/3+eyeR[3][0]*2/3);
+						eyeR[2][1] = j;
+						eyeR2 = 1;
+					}
+				}
+			}
+			for (var j = face[3][1]; j > e_b_break_R + 1; j--) {
+				if (data[(j*w+Math.floor(eyeR[0][0]*2/3+eyeR[3][0]*1/3))*4]==255) {
+					if (eyeR5 != 1) {
+						eyeR[5][0] = Math.floor(eyeR[0][0]*2/3+eyeR[3][0]*1/3);
+						eyeR[5][1] = j;
+						eyeR5 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(eyeR[0][0]*1/3+eyeR[3][0]*2/3))*4]==255) {
+					if (eyeR4 != 1) {
+						eyeR[4][0] = Math.floor(eyeR[0][0]*1/3+eyeR[3][0]*2/3);
+						eyeR[4][1] = j;
+						eyeR4 = 1;
+					}
+				}
+			}
+			
+			// mouth+nose
+			var enter_mouth = 0;
+			all_line_black = 0;
+			var m_n_break = 0;
+			var m_bottom = 0;
+			outerLoop:
+			for (var i = (face[6][1] - 40); i > face[3][1]; i--) {
+				for (var j = (l_list[i-3] + 20); j < (r_list[i-3] - 20); j++) {
+					if (data[(i*w+j)*4]==255) {
+						all_line_black += 1;
+						if (enter_mouth == 0) {
+							enter_mouth = 1;
+							m_bottom = i;
+						}
+					}
+				}
+				if ((enter_mouth == 1) && (all_line_black == 0)) {
+					m_n_break = i;
+					break outerLoop;
+				}
+				all_line_black = 0;
+			}
+			
+			// month
+			outerLoop:
+			for (var i = (l_list[m_bottom-3] + 15); i < (r_list[m_bottom-3] - 15); i++) {
+				for (var j = m_n_break; j < (m_bottom + 1); j++) {
+					if (data[(j*w+i)*4]==255) {
+						mouth[0][0] = i;
+						mouth[0][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			outerLoop:
+			for (var i = (r_list[m_bottom-3] - 15); i > (l_list[m_bottom-3] + 15); i--) {
+				for (var j = m_n_break; j < (m_bottom + 1); j++) {
+					if (data[(j*w+i)*4]==255) {
+						mouth[6][0] = i;
+						mouth[6][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			var mouth1 = 0;
+			var mouth2 = 0;
+			var mouth3 = 0;
+			var mouth4 = 0;
+			var mouth5 = 0;
+			var mouth7 = 0;
+			var mouth8 = 0;
+			var mouth9 = 0;
+			var mouth10 = 0;
+			var mouth11 = 0;
+			for (var j = m_n_break; j < m_bottom; j++) {
+				if (data[(j*w+Math.ceil(mouth[0][0]*5/6+mouth[6][0]*1/6))*4]==255) {
+					if (mouth1 != 1) {
+						mouth[1][0] = Math.ceil(mouth[0][0]*5/6+mouth[6][0]*1/6);
+						mouth[1][1] = j;
+						mouth1 = 1;
+					}
+				}
+				if (data[(j*w+Math.ceil(mouth[0][0]*4/6+mouth[6][0]*2/6))*4]==255) {
+					if (mouth2 != 1) {
+						mouth[2][0] = Math.ceil(mouth[0][0]*4/6+mouth[6][0]*2/6);
+						mouth[2][1] = j;
+						mouth2 = 1;
+					}
+				}
+				if (data[(j*w+Math.ceil(mouth[0][0]*3/6+mouth[6][0]*3/6))*4]==255) {
+					if (mouth3 != 1) {
+						mouth[3][0] = Math.ceil(mouth[0][0]*3/6+mouth[6][0]*3/6);
+						mouth[3][1] = j;
+						mouth3 = 1;
+					}
+				}
+				if (data[(j*w+Math.ceil(mouth[0][0]*2/6+mouth[6][0]*4/6))*4]==255) {
+					if (mouth4 != 1) {
+						mouth[4][0] = Math.ceil(mouth[0][0]*2/6+mouth[6][0]*4/6);
+						mouth[4][1] = j;
+						mouth4 = 1;
+					}
+				}
+				if (data[(j*w+Math.ceil(mouth[0][0]*1/6+mouth[6][0]*5/6))*4]==255) {
+					if (mouth5 != 1) {
+						mouth[5][0] = Math.ceil(mouth[0][0]*1/6+mouth[6][0]*5/6);
+						mouth[5][1] = j;
+						mouth5 = 1;
+					}
+				}
+			}
+			for (var j = m_bottom; j > m_n_break + 1; j--) {
+				if (data[(j*w+Math.floor(mouth[0][0]*5/6+mouth[6][0]*1/6))*4]==255) {
+					if (mouth11 != 1) {
+						mouth[11][0] = Math.floor(mouth[0][0]*5/6+mouth[6][0]*1/6);
+						mouth[11][1] = j;
+						mouth11 = 1;
+					}
+				}
+				if (data[(j*w+Math.floor(mouth[0][0]*1/6+mouth[6][0]*5/6))*4]==255) {
+					if (mouth7 != 1) {
+						mouth[7][0] = Math.floor(mouth[0][0]*1/6+mouth[6][0]*5/6);
+						mouth[7][1] = j;
+						mouth7 = 1;
+					}
+				}
+			}
+			mouth[10][0] = Math.ceil(mouth[0][0]*4/6+mouth[6][0]*2/6);
+			mouth[10][1] = Math.ceil(0.5 * (mouth[11][1] - mouth[0][1]) + mouth[11][1]);
+			mouth[9][0] = Math.ceil(mouth[0][0]*3/6+mouth[6][0]*3/6);
+			mouth[9][1] = Math.ceil(0.25 * (mouth[10][1] - mouth[11][1]) + mouth[10][1]);
+			mouth[8][0] = Math.ceil(mouth[0][0]*2/6+mouth[6][0]*4/6);
+			mouth[8][1] = mouth[10][1];
+			
+			// mouth top & mouth bottom
+			mouth_top[0][0] = mouth[0][0];
+			mouth_top[0][1] = mouth[0][1];
+			mouth_top[1][0] = mouth[1][0];
+			mouth_top[1][1] = mouth[1][1];
+			mouth_top[2][0] = mouth[2][0];
+			mouth_top[2][1] = mouth[2][1];
+			mouth_top[3][0] = mouth[3][0];
+			mouth_top[3][1] = mouth[3][1];
+			mouth_top[4][0] = mouth[4][0];
+			mouth_top[4][1] = mouth[4][1];
+			mouth_top[5][0] = mouth[5][0];
+			mouth_top[5][1] = mouth[5][1];
+			mouth_top[6][0] = mouth[6][0];
+			mouth_top[6][1] = mouth[6][1];
+			mouth_top[7][0] = Math.floor(mouth[0][0]*1/4+mouth[6][0]*3/4);
+			mouth_top[7][1] = Math.ceil(0.48 * (mouth[11][1] - mouth[0][1]) + mouth[6][1]);
+			mouth_top[8][0] = Math.floor(mouth[0][0]*2/4+mouth[6][0]*2/4);
+			mouth_top[8][1] = Math.ceil(0.24 * (mouth_top[7][1] - mouth[6][1]) + mouth_top[7][1]);
+			mouth_top[9][0] = Math.floor(mouth[0][0]*3/4+mouth[6][0]*1/4);
+			mouth_top[9][1] = Math.ceil(0.48 * (mouth[11][1] - mouth[0][1]) + mouth[6][1]);
+			
+			mouth_bottom[0][0] = mouth[0][0];
+			mouth_bottom[0][1] = mouth[0][1];
+			mouth_bottom[6][0] = mouth[6][0];
+			mouth_bottom[6][1] = mouth[6][1];
+			mouth_bottom[5][0] = mouth[7][0];
+			mouth_bottom[5][1] = mouth[7][1];
+			mouth_bottom[4][0] = mouth[8][0];
+			mouth_bottom[4][1] = mouth[8][1];
+			mouth_bottom[3][0] = mouth[9][0];
+			mouth_bottom[3][1] = mouth[9][1];
+			mouth_bottom[2][0] = mouth[10][0];
+			mouth_bottom[2][1] = mouth[10][1];
+			mouth_bottom[1][0] = mouth[11][0];
+			mouth_bottom[1][1] = mouth[11][1];
+			mouth_bottom[7][0] = Math.floor(mouth[0][0]*1/4+mouth[6][0]*3/4);
+			mouth_bottom[7][1] = Math.ceil(0.48 * (mouth[11][1] - mouth[0][1]) + mouth[6][1]);
+			mouth_bottom[8][0] = Math.floor(mouth[0][0]*2/4+mouth[6][0]*2/4);
+			mouth_bottom[8][1] = Math.ceil(0.24 * (mouth_top[7][1] - mouth[6][1]) + mouth_top[7][1]);
+			mouth_bottom[9][0] = Math.floor(mouth[0][0]*3/4+mouth[6][0]*1/4);
+			mouth_bottom[9][1] = Math.ceil(0.48 * (mouth[11][1] - mouth[0][1]) + mouth[6][1]);
+			
+			// nose
+			outerLoop:
+			for (var i = (l_list[m_n_break-3] + 15); i < (r_list[m_n_break-3] - 15); i++) {
+				for (var j = m_n_break; j > face[3][1]; j--) {
+					if (data[(j*w+i)*4]==255) {
+						nose[0][0] = i;
+						nose[0][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			outerLoop:
+			for (var i = (r_list[m_n_break-3] - 15); i > (l_list[m_n_break-3] + 15); i--) {
+				for (var j = m_n_break; j > face[3][1]; j--) {
+					if (data[(j*w+i)*4]==255) {
+						nose[2][0] = i;
+						nose[2][1] = j;
+						break outerLoop;
+					}
+				}
+			}
+			
+			nose[1][0] = Math.floor((eyeL[3][0] + eyeR[3][0])/2);
+			nose[1][1] = Math.floor((eyeL[3][1] + eyeR[3][1])/2);
+			nose[3][0] = Math.floor(nose[0][0]*1/3+nose[2][0]*2/3);
+			nose[3][1] = nose[0][1] + 15;
+			nose[4][0] = Math.floor(nose[0][0]*2/3+nose[2][0]*1/3);
+			nose[4][1] = nose[0][1] + 15;
+		}
+		
+		// 呈現平滑連線
+		function drawline(c, l_n) {
+			var ctx = c;
+			var l_n_2 = l_n;
+			
+			ctx.fillStyle = "#00ff00";
+			for (const [x, y] of l_n_2) {
+				ctx.beginPath();
+				ctx.arc(x, y, 5, 0, Math.PI * 2);
+				ctx.fill();
+			}
+			
+			function catmullRomSpline(p0, p1, p2, p3, t) {
+				const t2 = t * t;
+				const t3 = t2 * t;
+				const x = 0.5 * ((2 * p1[0]) +
+					(-p0[0] + p2[0]) * t +
+					(2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * t2 +
+					(-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * t3);
+				const y = 0.5 * ((2 * p1[1]) +
+					(-p0[1] + p2[1]) * t +
+					(2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * t2 +
+					(-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * t3);
+				return [x, y];
+			}
+
+			ctx.strokeStyle = "#00ff00";
+			ctx.lineWidth = 3;
+			ctx.beginPath();
+			for (let i = 0; i < l_n_2.length; i++) {
+				const p0 = l_n_2[(i - 1 + l_n_2.length) % l_n_2.length];
+				const p1 = l_n_2[i];
+				const p2 = l_n_2[(i + 1) % l_n_2.length];
+				const p3 = l_n_2[(i + 2) % l_n_2.length];
+
+				for (let t = 0; t < 1; t += 0.05) {
+					const [x, y] = catmullRomSpline(p0, p1, p2, p3, t);
+					if (i === 0 && t === 0) ctx.moveTo(x, y);
+					else ctx.lineTo(x, y);
+				}
+			}
+			ctx.closePath();
+			ctx.stroke();
+		}
+		
+		// 全域變數
+		var leftest;
+		var rightest;
+		const canvas2 = document.getElementById("canvas_image");
+		const ctx2 = canvas2.getContext("2d");
+
+		function gamma(n) {
+			var v = n / 255;
+			
+			if (v > 0.04045) {
+				v = ((v + 0.055) / 1.055) ** 2.4;
+			} else {
+				v = v / 12.92; 
+			}
+			
+			return v;
+		}
+			
+		function f_of_t(t) {
+			if (t > 0.008856) {
+				var T = t ** (1/3);
+			} else {
+				var T = (1/3)*((29/6)**2) * t + (4/29);
+			}
+			
+			return T;
+		}
+			
+		function turn_Lab(r, g, b) {
+			const R = gamma(r);
+			const G = gamma(g);
+			const B = gamma(b);
+			
+			var X = R * 0.412453 + G * 0.357580 + B * 0.180423;
+			var Y = R * 0.212671 + G * 0.715160 + B * 0.072169;
+			var Z = R * 0.019334 + G * 0.119193 + B * 0.950227;
+			
+			X = X / 0.95047;
+			Y = Y / 1.0;
+			Z = Z / 1.08883;
+			
+			const L = 116 * f_of_t(Y) - 16;
+			const a = 500 * (f_of_t(X) - f_of_t(Y));
+			const b_ = 200 * (f_of_t(Y) - f_of_t(Z));
+			
+			return [L, a, b_];
+		}
+
+		function isHairColor(r, g, b, h2) {
+		  const darkness = (r + g + b) / 3 < h2;
+		  const isBrown = r > 60 && r < 130 && g < 80 && b < 60;
+		  return darkness || isBrown;
+		}
+
+		function isBackground(r, g, b, b2) {
+		  const brightness = (r + g + b) / 3 > b2;
+		  return brightness;
+		}
+
+		function isGrayEdge(r, g, b, h2, b2, g2) {
+		  const avg = (r + g + b) / 3;
+		  const maxDiff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(b - r));
+		  const md = maxDiff < g2;
+		  return avg >= h2 && avg <= b2 && md;
+		}
+		
+		// 邊緣偵測
+		function edgeDetection(w, h, t, s, h2, b, g) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+				
+			canvas.width = w;
+			canvas.height = h;
+				
+			const image_data = ctx.createImageData(w, h);
+			const data = image_data.data;
+				
+			// step 1: Gaussian Blur
+			const gk = [[2,4,5,4,2],[4,9,12,9,4],[5,12,15,12,5],[4,9,12,9,4],[2,4,5,4,2]];
+			//const gk = [[1,4,7,4,1],[4,16,26,16,4],[7,26,41,26,7],[4,16,26,16,4],[1,4,7,4,1]];
+			//const gk = [[1,1,2,1,1],[1,2,4,2,1],[2,4,8,4,2],[1,2,4,2,1],[1,1,2,1,1]];
+			var gb_data = [];
+			for (var i = 2; i < (h - 2); i++){
+				for (var j = 2; j < (w - 2); j++){
+					var gb = 0;
+					for (var k = -2; k < 3; k++){
+						for (var m = -2; m < 3; m++) {
+							gb = gb + gk[2+k][m+2] * colorLab[(i+k)*w+j+m][0];
+						}
+					}
+					gb_data[(i-2)*(w-4)+(j-2)] = gb / 159;
+				}
+			}
+				
+			// step 2: Sobel Kernels
+			var strength_data = [];
+			var theta_data = [];
+			for (var i = 1; i < (h - 5); i++){
+				for (var j = 1; j < (w - 5); j++){
+					var gx = 0;
+					gx = gx + gb_data[(i-1)*(w-4)+j-1] + 2 * gb_data[i*(w-4)+j-1] + gb_data[(i+1)*(w-4)+j-1];
+					gx = gx - gb_data[(i-1)*(w-4)+j+1] - 2 * gb_data[i*(w-4)+j+1] - gb_data[(i+1)*(w-4)+j+1];
+					var gy = 0;
+					gy = gy + gb_data[(i-1)*(w-4)+j-1] + 2 * gb_data[(i-1)*(w-4)+j] + gb_data[(i-1)*(w-4)+j+1];
+					gy = gy - gb_data[(i+1)*(w-4)+j-1] - 2 * gb_data[(i+1)*(w-4)+j] - gb_data[(i+1)*(w-4)+j+1];				
+					
+					strength_data[(i-1)*(w-6)+j-1] = ((gx**2) + (gy**2))**0.5;
+					theta_data[(i-1)*(w-6)+j-1] = Math.atan2(gy,gx);
+				}
+			}
+				
+			// step 3: Dual Thresholding
+			var max_strength = 0;
+			for (var i = 0; i < (h - 6); i++){
+				for (var j = 0; j < (w - 6); j++){
+					if (strength_data[i*(w-6)+j] > max_strength) {
+						max_strength = strength_data[i*(w-6)+j];
+					}		
+				}
+			}
+			edge_data = [];
+			edge_data_S = [];
+			for (var i = 0; i < (h - 6); i++){
+				for (var j = 0; j < (w - 6); j++){
+					if (strength_data[i*(w-6)+j] > (t / 100 * max_strength)) {
+						edge_data[i*(w-6)+j] = 2;
+					} else if (strength_data[i*(w-6)+j] < (t / 200 * max_strength)) {
+						edge_data[i*(w-6)+j] = 0;
+					} else {
+						edge_data[i*(w-6)+j] = 1;
+					}
+					if (strength_data[i*(w-6)+j] > (s / 100 * max_strength)) {
+						edge_data_S[i*(w-6)+j] = 2;
+					} else if (strength_data[i*(w-6)+j] < (s / 200 * max_strength)) {
+						edge_data_S[i*(w-6)+j] = 0;
+					} else {
+						edge_data_S[i*(w-6)+j] = 1;
+					}
+				}
+			}
+				
+			// step 4: Edge Tracking by Hysteresis
+			var change = true;
+			while (change) {
+				change = false;
+				for (var i = 0; i < (h - 6); i++){
+					for (var j = 0; j < (w - 6); j++){
+						if (edge_data[i*(w-6)+j] == 1) {
+							for (var k = -1; k < 2; k++) {
+								for (var m = -1; m < 2; m++) {
+									if (edge_data[Math.min(Math.max(i+k,0),h-7)*(w-6)+Math.min(Math.max(j+m,0),w-7)] == 2) {
+										edge_data[i*(w-6)+j] = 2;
+										change = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			var change = true;
+			while (change) {
+				change = false;
+				for (var i = 0; i < (h - 6); i++){
+					for (var j = 0; j < (w - 6); j++){
+						if (edge_data_S[i*(w-6)+j] == 1) {
+							for (var k = -1; k < 2; k++) {
+								for (var m = -1; m < 2; m++) {
+									if (edge_data_S[Math.min(Math.max(i+k,0),h-7)*(w-6)+Math.min(Math.max(j+m,0),w-7)] == 2) {
+										edge_data_S[i*(w-6)+j] = 2;
+										change = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			leftest = w-3;
+			rightest = 0;
+			for (var i = 3; i < (h - 3); i++) {
+				for (var j = 3; j < (w - 3); j++) {
+					var ih = isHairColor(colorRGB[i*w+j][0],colorRGB[i*w+j][1],colorRGB[i*w+j][2],h2);
+					var ib = isBackground(colorRGB[i*w+j][0],colorRGB[i*w+j][1],colorRGB[i*w+j][2],b);
+					var ig = isGrayEdge(colorRGB[i*w+j][0],colorRGB[i*w+j][1],colorRGB[i*w+j][2],h2, b, g);
+					if (edge_data[(i-3)*(w-6)+j-3] == 2 && (!(ih||ib||ig))) {
+						data[(i*w+j)*4] = 255;
+						data[(i*w+j)*4+1] = 255;
+						data[(i*w+j)*4+2] = 255;
+						data[(i*w+j)*4+3] = 255;
+						if (j <= leftest) {
+							leftest = j;
+						}
+						if (j >= rightest) {
+							rightest = j;
+						}
+					} else {
+						data[(i*w+j)*4] = 0;
+						data[(i*w+j)*4+1] = 0;
+						data[(i*w+j)*4+2] = 0;
+						data[(i*w+j)*4+3] = 255;
+					}
+				}
+			}
+			
+			var l_list = [];
+			var r_list = [];
+			var lastr = 0;
+			var lastl = 0;
+			var trend = 0;
+			var trend_break = 0;
+			for (var i = 3; i < (h - 3); i++) {
+				var l = w-3;
+				var r = 0;
+				var r_l = 0;
+				for (var j = 3; j < (w - 3); j++) {
+					if ((data[(i*w+j)*4]==255) && (data[(i*w+j)*4+1]==255) && (data[(i*w+j)*4+2]==255)) {
+						if (j <= l) {
+							l = j;
+						}
+						if (j >= r) {
+							r = j;
+						}
+					}
+				}
+				if(l >= r) {
+					l = 0;
+				}
+				r_l = r - l;
+				lastr_l = lastr - lastl;
+				if (r_l - lastr_l > (rightest - leftest) * 0.05) {
+					if (lastr_l >= (rightest - leftest) * 0.5) {
+						for (var k = 3; k < (w - 3); k++) {
+							if ((k < lastl) || (k > lastr)) {
+								data[(i*w+k)*4] = 0;
+								data[(i*w+k)*4+1] = 0;
+								data[(i*w+k)*4+2] = 0;
+							}
+						}
+						if ((data[(i*w+lastl)*4]==0) && (data[(i*w+lastl)*4+1]==0) && (data[(i*w+lastl)*4+2]==0) && (data[(i*w+lastl+1)*4]==0) && (data[(i*w+lastl+1)*4+1]==0) && (data[(i*w+lastl+1)*4+2]==0)) {
+							data[(i*w+lastl)*4] = 255;
+							data[(i*w+lastl)*4+1] = 255;
+							data[(i*w+lastl)*4+2] = 255;
+						}
+						if ((data[(i*w+lastr)*4]==0) && (data[(i*w+lastr)*4+1]==0) && (data[(i*w+lastr)*4+2]==0) && (data[(i*w+lastr-1)*4]==0) && (data[(i*w+lastr-1)*4+1]==0) && (data[(i*w+lastr-1)*4+2]==0)) {
+							data[(i*w+lastr)*4] = 255;
+							data[(i*w+lastr)*4+1] = 255;
+							data[(i*w+lastr)*4+2] = 255;
+						}
+					}
+					l = w-3;
+					r = 0;
+					for (var m = 3; m < (w - 3); m++) {
+						if ((data[(i*w+m)*4]==255) && (data[(i*w+m)*4+1]==255) && (data[(i*w+m)*4+2]==255)) {
+							if (m <= l) {
+								l = m;
+							}
+							if (m >= r) {
+								r = m;
+							}
+						}
+					}
+					if(l >= r) {
+						l = 0;
+					}
+				}
+				l = w-3;
+				r = 0;
+				for (var m = 3; m < (w - 3); m++) {
+					if ((data[(i*w+m)*4]==255) && (data[(i*w+m)*4+1]==255) && (data[(i*w+m)*4+2]==255)) {
+						if (m <= l) {
+							l = m;
+						}
+						if (m >= r) {
+							r = m;
+						}
+					}
+				}
+				if(l >= r) {
+					l = 0;
+				}
+				lastr = r;
+				lastl = l;
+				l_list[i-3] = l;
+				r_list[i-3] = r;
+			}
+			var t_list = [];
+			var b_list = [];
+			for (var i = 3; i < (w - 3); i++) {
+				for (var j = 3; j < (h - 3); j++) {
+					if (data[(j*w+i)*4]==255) {
+						t_list[i-3] = j;
+						break;
+					}
+				}
+			}
+			for (var i = 3; i < (w - 3); i++) {
+				for (var j = (h - 4); j > 2; j--) {
+					if (data[(j*w+i)*4]==255) {
+						b_list[i-3] = j;
+						break;
+					}
+				}
+			}
+			
+			control_point_f(data);
+			
+			for (var i = 3; i < (h - 3); i++) {
+				for (var m = 3; m < (w - 3); m++) {
+					if ((m > l_list[i-3]) && (m < r_list[i-3])) {
+						var ih = isHairColor(colorRGB[i*w+m][0],colorRGB[i*w+m][1],colorRGB[i*w+m][2],h2);
+						var ib = isBackground(colorRGB[i*w+m][0],colorRGB[i*w+m][1],colorRGB[i*w+m][2],b);
+						var ig = isGrayEdge(colorRGB[i*w+m][0],colorRGB[i*w+m][1],colorRGB[i*w+m][2],h2, b, g);
+						if (edge_data_S[(i-3)*(w-6)+m-3] == 2 && (!(ih||ib||ig))) {
+							data[(i*w+m)*4] = 255;
+							data[(i*w+m)*4+1] = 255;
+							data[(i*w+m)*4+2] = 255;
+							data[(i*w+m)*4+3] = 255;
+						} else {
+							data[(i*w+m)*4] = 0;
+							data[(i*w+m)*4+1] = 0;
+							data[(i*w+m)*4+2] = 0;
+							data[(i*w+m)*4+3] = 255;
+						}
+					}
+				}
+			}
+			ctx.putImageData(image_data, 0, 0);
+			
+			control_point(data, t_list, b_list, l_list, r_list);
+			
+			drawline(ctx, face);
+			drawline(ctx, browL);
+			drawline(ctx, eyeL);
+			drawline(ctx, browR);
+			drawline(ctx, eyeR);
+			drawline(ctx, mouth_top);
+			drawline(ctx, mouth_bottom);
+			drawline(ctx, nose);
+			
+			image_URL = canvas.toDataURL();
+			canvas2.width = w;
+			canvas2.height = h;
+			canvas2.style.height = h + "px";
+			
+			img = new Image();
+			img.src = image_URL;
+			img.onload = function() {
+				ctx2.drawImage(img, 0, 0, canvas2.width, canvas2.height);
+			};
+		}
+
+		function changeThreshold() {
+			const newThreshold = document.getElementById("threshold").value;
+			const newThreshold_S = document.getElementById("threshold_S").value;
+			const newThreshold_H = document.getElementById("threshold_H").value;
+			const newThreshold_B = document.getElementById("threshold_B").value;
+			const newThreshold_G = document.getElementById("threshold_G").value;
+			edgeDetection(w, h, newThreshold, newThreshold_S, newThreshold_H, newThreshold_B, newThreshold_G);
+		}
+
+		function down() {
+			const exporter = new THREE.OBJExporter();
+			const group = new THREE.Group();
+			group.add(meshF.clone());
+			group.add(meshBL.clone());
+			group.add(meshBR.clone());
+			group.add(meshEL.clone());
+			group.add(meshER.clone());
+			group.add(meshN.clone());
+			group.add(meshMB.clone());
+			group.add(meshMT.clone());
+			const result = exporter.parse(group);
+
+			const blob = new Blob([result], { type: 'text/plain' });
+			const link = document.createElement('a');
+			link.href = URL.createObjectURL(blob);
+			link.download = 'model.obj';
+			link.click();
+		}
+
+		function changePage(n) {
+			if (n == 2) {
+				modelF(face);
+				modelN(nose);
+				modelM(mouth_top, 0);
+				modelM(mouth_bottom, 1);
+				modelBL(browL);
+				modelBR(browR);
+				modelEL(eyeL);
+				modelER(eyeR);
+			}
+			for (var i=0; i<2; i++) {
+				document.getElementById("section"+(i+1)).style.display = "none";
+			}
+			document.getElementById("section"+n).style.display = "block";
+		}
+
+		var colorRGB = [];
+		var colorLab = [];
+		var edge_data = [];
+		var image_URL = "";
+		var w = 0;
+		var h = 0;
+		let img = new Image();
+		for (var i=0; i<2; i++) {
+			document.getElementById("section"+(i+1)).style.display = "none";
+		}
+		document.getElementById("section1").style.display = "flex";
+
+		function loadImg(){
+			var file = document.getElementById("loadImage").files[0];
+			if (!file) {
+				console.log("Wrong Upload.");
+				return;
+			}
+			const image = new Image();
+			image.onload = function () {
+				colorRGB = [];
+				colorLab = [];
+				w = image.width;
+				h = image.height;
+				document.getElementById("threshold").value = 5;
+				document.getElementById("threshold_S").value = 20;
+				document.getElementById("threshold_H").value = 80;
+				document.getElementById("threshold_B").value = 200;
+				document.getElementById("threshold_G").value = 40;
+				const canvas = document.createElement("canvas");
+				const ctx = canvas.getContext("2d");
+
+				canvas.width = image.width;
+				canvas.height = image.height;
+				ctx.drawImage(image, 0, 0);
+				
+				const image_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				const data = image_data.data;
+				
+				for (var i = 0; i < canvas.height; i++) {
+					for (var j = 0; j < canvas.width; j++) {
+						const index = (i * canvas.width + j) * 4;
+						const r = data[index];
+						const g = data[index + 1];
+						const b = data[index + 2];
+						colorRGB[i * canvas.width + j] = [r, g, b],
+						colorLab[i * canvas.width + j] = turn_Lab(r, g, b);
+					}
+				}
+				
+				edgeDetection(canvas.width, canvas.height, 5, 20, 80, 200, 40);
+			};
+			image.src = URL.createObjectURL(file);
+		}
+
+	</script>
+</body>
+</html>

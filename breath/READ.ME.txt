@@ -1,0 +1,9 @@
+[READ.ME]
+
+本組設計之 Breath 系統操作指南
+
+1. 開啟命令提示字元
+2. 將路徑切換至 breath.html 所在資料夾位置
+3. 在命令提示字元中輸入 python -m http.server
+4. 打開瀏覽器，進入此網址：http://localhost:8000/breath.html，即可開始體驗 Breath 系統
+5. 資料夾中提供效果較佳的範例照片，歡迎自由使用

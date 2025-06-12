@@ -1,0 +1,128 @@
+body {
+	margin: 0;
+}
+
+#head {
+	width: 100vw;
+	height: 5vw;
+	background-image: url("banner.jpg");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	display: flex;
+	flex-direction: row;
+	justify-content: right;
+	align-items: center;
+}
+
+#section1, #section2 {
+	width: 100vw;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 2vw;
+}
+
+#section2 {
+	flex-direction: column;
+	height: calc(100vh - 5vw);
+	margin-top: 0;
+}
+
+#animation_section {
+	margin-top: 50px;
+	margin-bottom: 10px;
+	width: 100vw;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#canvas_animation {
+	width: 60vw;
+	height: 36vw;
+	background-color: #CCCCCC;
+	border-radius: 1vw;
+}
+
+#detection_section {
+	width: 100vw;
+	display: flex;
+	flex-direction: column;
+}
+
+#upload_section {
+	width: 20vw;
+	height: 5.3125vw;
+	background-image: url("upload_btn.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	margin-left: calc(50vw - 10vw);
+}
+
+#upload_section:hover {
+	background-image: url("upload_btn_hover.png");
+	cursor: pointer;
+}
+
+#upload_section input {
+	visibility: hidden;
+}
+
+#preview_text {
+	font-size: 1.5vw;
+	text-align: center;
+	margin-top: 4vw;
+	margin-bottom: 0.5vw;
+}
+
+#preview_section {
+	width: 100vw;
+	display: flex;
+	flex-direction:column;
+	align-items: center;
+	justify-content: center;
+	background-color: #EFEFEF;
+	border-radius: 1vw;
+	gap: 2vw;
+}
+
+.parameter {
+	display: flex;
+	gap: 1vw;
+}
+
+.parameter_inp {
+	display: flex;
+	flex-direction: column;
+}
+
+#threshold, #threshold_S, #threshold_H, #threshold_B, #threshold_G {
+	padding: 0.5vw;
+	font-size: 1vw;
+}
+
+#download_btn, #detection_btn, #animation_btn {
+	height: 1.5vw;
+	padding: 0.5vw;
+	color: #6fc4bd;
+	background-color: white;
+	border-radius: 0.5vw;
+	font-size: 1.5vw;
+	margin-right: 1vw;
+}
+
+#download_btn {
+	width: 12vw;
+	text-align: center;
+	margin-left: 44vw;
+	margin-right: auto;
+}
+
+#download_btn:hover, #detection_btn:hover, #animation_btn:hover {
+	color: white;
+	background-color: #6fc4bd;
+	cursor: pointer;
+}
