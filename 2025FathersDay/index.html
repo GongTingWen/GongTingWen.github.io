@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="用滿滿的感謝與祝福妝點獨一無二的父親節蛋糕吧！">
+<title>Gratitude on the cake | 2025 Happy Father's Day</title>
+<meta http-equiv="content-type" content="text/html">
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.3/jquery-ui.js"></script>
+<style>
+	body {
+		margin: 0;
+		background-color: #e3e3e0;
+		overflow: hidden;
+	}
+	
+	#menu {
+		position: absolute;
+		top: 1vmax;
+		left: 1vmax;
+		display: flex;
+		justify-content: center;
+		gap: 3vmax;
+	}
+	
+	#p_back, #p_done, #p_edit, #p_photo, #p_again {
+		width: 5vmax;
+		height: 5vmax;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+	}
+	
+	#p_back{
+		background-image: url("button1.png");
+	}
+	
+	#p_done {
+		background-image: url("button2.png");
+	}
+	
+	#p_edit {
+		background-image: url("button3.png");
+	}
+	
+	#p_photo {
+		background-image: url("button5.png");
+	}
+	
+	#p_again {
+		background-image: url("button4.png");
+	}
+	
+	#list {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		right: 0;
+	}
+	
+	#color, #size, #shape {
+		width: 12.5vmax;
+		height: 12.5vmax;
+		background-color: #f4f5ed;
+		border: 0.3vmax solid #afbac9;
+		border-radius: 6.25vmax 0 0 6.25vmax;
+		box-shadow: -0.3125vmax 0 1.25vmax rgba(0, 0, 0, 0.3);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1vmax;
+	}
+	
+	#color:hover, #size:hover, #shape:hover {
+		cursor: pointer;
+		background-color: #f5e8d8;
+		border: 0.3vmax solid #d1adb1;
+		#t_color, #t_size, #t_shape {
+			color: #d099a2;
+		}
+	}
+	
+	#t_color, #t_size, #t_shape {
+		color: #8794a5;
+		font-family: "Noto Sans TC";
+		font-weight: bold;
+		font-size: 1.5vmax;
+		text-align: center;
+		margin-top: 1vmax;
+		width: 10.5vmax;
+		transform:translate(1vmax,0);
+	}
+	
+	#p_color, #p_size, #p_shape {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 5.5vmax;
+		height: 5.5vmax;
+		transform:translate(1vmax,0);
+	}
+	
+	#option, #option2 {
+		background-color: rgba(255, 255, 255, 0.8);
+		width: 100vmax;
+		height: 6.25vmax;
+		border-radius: 50% / 100% 100% 0 0;
+		position: absolute;
+		bottom: 0;
+		box-shadow: 0 -0.3125vmax 2.5vmax rgba(0, 0, 0, 0.3);
+		animation: slide-in 0.5s forwards;
+		display: none;
+	}
+	
+	#title {
+		color: #b1bccc;
+		font-family: "Noto Sans TC";
+		font-weight: bold;
+		font-size: 1.75vmax;
+		text-align: center;
+		line-height: 6.25vmax;
+	}
+	
+	#contents, #contents2 {
+		display: flex;
+		gap: 3vmax;
+		justify-content: center;
+		position: absolute;
+		width: 90vmax;
+		left: 5vmax;
+		top: -2vmax;
+	}
+	
+	.btn {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		font-family: "Noto Sans TC";
+		font-size: 1.5vmax;
+		font-weight: bold;
+		color: #8794a5;
+	}
+	
+	.btn:hover {
+		cursor: pointer;
+		filter: drop-shadow(0 0 0.5vmax #FFFFFF);
+	}
+	
+	.colors {
+		height: 3vmax;
+		width: 3vmax;
+		border-radius: 1.5vmax;
+	}
+	
+	.sizes {
+		background-color: #000000;
+	}
+	
+	.active {
+		filter: drop-shadow(0 0 0.5vmax #F4B05C);
+	}
+	.shapes {
+		height: 5vmax;
+		width: 5vmax;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		transform:translate(0,-2vmax);
+	}
+	
+	.colors:hover, .sizes:hover, .shapes:hover {
+		cursor: pointer;
+		filter: drop-shadow(0 0 0.5vmax #F4B05C);
+	}
+	
+	.p_color {
+		width: 5.5vmax;
+		height: 5.5vmax;
+		border-radius: 2.75vmax;
+		background-color: #F8EED4;
+	}
+	
+	.p_size {
+		width: 1vmax;
+		height: 1vmax;
+		border-radius: 0.5vmax;
+		background-color: #8794a5;
+	}
+	
+	.p_shape {
+		width: 5.5vmax;
+		height: 5.5vmax;
+		background-image: url("butter4.png");
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+	}
+	
+	#canvas3D {
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: -1;
+	}
+	
+	#canvas2D {
+		width: 84vmin;
+		height: 84vmin;
+		border-radius: 42vmin;
+		position: absolute;
+		top: 8vmin;
+		left: calc(50% - 42vmin);
+	}
+	
+	@keyframes slide-in {
+	  from {
+		transform:translate(0,7vmax);
+	  }
+	  to {
+		transform:translate(0,0);
+	  }
+	}
+</style>
+</head>
+
+<body>
+	<canvas id="canvas3D"></canvas>
+	<div id="page1">
+		<canvas id="canvas2D"></canvas>
+		<div id="menu">
+			<div id="back" class="btn">
+				<div id="p_back"></div>
+				<div id="t_back">回上一步</div>
+			</div>
+			<div id="done" class="btn">
+				<div id="p_done"></div>
+				<div id="t_done" style="color: #DD5F52;">大功告成</div>
+			</div>
+		</div>
+		<div id="list">
+			<div id="color">
+				<div id="t_color">Color</div>
+				<div id="p_color"></div>
+			</div>
+			<div id="size">
+				<div id="t_size">Size</div>
+				<div id="p_size"></div>
+			</div>
+			<div id="shape">
+				<div id="t_shape">Shape</div>
+				<div id="p_shape"></div>
+			</div>
+		</div>
+		<div id="option">
+			<div id="contents"></div>
+			<div id="title">Color</div>
+		</div>
+	</div>
+	<div id="page2">
+		<div id="option2">
+			<div id="contents2">
+				<div id="edit" class="btn" style="transform:translate(0,-1vmax);">
+					<div id="p_edit"></div>
+					<div id="t_edit">返回編輯</div>
+				</div>
+				<div id="photo" class="btn" style="transform:translate(0,-1.5vmax);">
+					<div id="p_photo"></div>
+					<div id="t_photo">拍照留念</div>
+				</div>
+				<div id="again" class="btn" style="transform:translate(0,-1vmax);">
+					<div id="p_again"></div>
+					<div id="t_again">再玩一次</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r110/three.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/math/ConvexHull.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/geometries/ConvexGeometry.js"></script>
+	<script src="OBJExporter.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/GLTFLoader.js"></script>
+
+	<script>
+		var opt = 0;
+		var co = "#F8EED4";
+		var sz = 10;
+		var sp = 4;
+		var co_p = 0;
+		var sz_p = 0;
+		var sp_p = 0;
+		// 在頁面載入時就嘗試鎖定為橫向模式
+		if (screen.orientation) {
+			screen.orientation.lock('landscape').then(() => {
+				console.log('螢幕已鎖定為橫向。');
+			}).catch((error) => {
+				console.log('無法鎖定螢幕方向：', error);
+				// 如果鎖定失敗，可以退而求其次，顯示提示訊息
+				alert('請將您的手機轉為橫向並重新刷新網頁，以獲得最佳體驗！');
+			});
+		}
+		
+		$(document).ready(function () {
+			$("#canvas3D").attr("width", screen.width);
+			$("#canvas3D").attr("height", screen.height);
+			const scene = new THREE.Scene();
+			const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas3D") });
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+			
+			scene.background = new THREE.Color('#E3E3E0');
+			
+			const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+			camera.position.set(0, 2.8, 0);
+			camera.lookAt(0, 0, 0);
+					
+			// 1. 環境光：提供柔和的整體照明，強度不要太高
+			const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // 顏色為白色，強度 0.5
+			ambientLight.name = "ambientLight";
+			scene.add(ambientLight);
+
+			// 2. 主光源：使用一盞強烈的平行光來模擬太陽光
+			const mainLight = new THREE.DirectionalLight(0xffffff, 0.4); // 強度設為 1
+			mainLight.position.set(5, 5, 5); // 從斜上方照射
+			mainLight.castShadow = true; // 啟用陰影，讓模型更有立體感
+			mainLight.name = "mainLight";
+			scene.add(mainLight);
+
+			// 3. 輔助光源：使用一盞較弱的平行光，從不同方向照亮模型的暗部
+			const fillLight = new THREE.DirectionalLight(0xffffff, 0.3); // 強度設為 0.3
+			fillLight.position.set(-5, 5, -5); // 從另一個斜上方照射
+			fillLight.name = "fillLight";
+			scene.add(fillLight);
+
+			// (可選) 如果你需要點光源，可以只留一盞，並調整其位置和強度
+			const pointLight = new THREE.PointLight(0xffffff, 0.5, 10);
+			pointLight.position.set(0, 5, 0);
+			pointLight.name = "pointLight";
+			scene.add(pointLight);
+			
+			var cakeModel;
+			const loader = new THREE.GLTFLoader();
+			loader.load(
+			  'cake.glb', // 模型檔案路徑
+			  function(gltf) {
+				cakeModel = gltf.scene;
+				cakeModel.name = "cakeModel";
+				cakeModel.traverse(function(child) {
+					if (child.isMesh) {
+						child.material = new THREE.MeshStandardMaterial({
+							color: 0xF2B46A,
+							roughness: 1, // 粗糙度，0 為光滑，1 為粗糙
+							metalness: 0.1  // 金屬度，0 為非金屬，1 為金屬
+						});
+					}
+				});
+				scene.add(cakeModel);
+				animate();
+			  },
+			  function(xhr) {
+				console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+			  },
+			  function(error) {
+				console.error('An error happened', error);
+			  }
+			);
+			
+			var plateModel;
+			loader.load(
+			  'plate.glb', // 模型檔案路徑
+			  function(gltf) {
+				plateModel = gltf.scene;
+				plateModel.name = "plateModel";
+				plateModel.traverse(function(child) {
+					if (child.isMesh) {
+						child.material = new THREE.MeshStandardMaterial({
+							color: 0xffffff,
+							roughness: 0.3, // 粗糙度，0 為光滑，1 為粗糙
+							metalness: 0.2  // 金屬度，0 為非金屬，1 為金屬
+						});
+					}
+				});
+				scene.add(plateModel);
+			  },
+			  function(xhr) {
+				console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+			  },
+			  function(error) {
+				console.error('An error happened', error);
+			  }
+			);
+			
+			var butter1Model;
+			loader.load(
+			  'butter1_1.glb', // 模型檔案路徑
+			  function(gltf) {
+				butter1Model = gltf.scene;
+				butter1Model.traverse(function(child) {
+					if (child.isMesh) {
+						child.material = new THREE.MeshStandardMaterial({
+							color: 0xffffff,
+							roughness: 1, // 粗糙度，0 為光滑，1 為粗糙
+							metalness: 0.1  // 金屬度，0 為非金屬，1 為金屬
+						});
+					}
+				});
+			  },
+			  function(xhr) {
+				console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+			  },
+			  function(error) {
+				console.error('An error happened', error);
+			  }
+			);
+			
+			var butter2Model;
+			loader.load(
+			  'butter2_1.glb', // 模型檔案路徑
+			  function(gltf) {
+				butter2Model = gltf.scene;
+				butter2Model.traverse(function(child) {
+					if (child.isMesh) {
+						child.material = new THREE.MeshStandardMaterial({
+							color: 0xffffff,
+							roughness: 1, // 粗糙度，0 為光滑，1 為粗糙
+							metalness: 0.1  // 金屬度，0 為非金屬，1 為金屬
+						});
+					}
+				});
+			  },
+			  function(xhr) {
+				console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+			  },
+			  function(error) {
+				console.error('An error happened', error);
+			  }
+			);
+			
+			function animate() {
+			  requestAnimationFrame(animate);
+			  renderer.render(scene, camera);
+			}
+			
+			// 取得畫布和 2D 繪圖環境
+			const canvas = document.getElementById("canvas2D");
+			const ctx = canvas.getContext("2d");
+			
+			function setCanvasSize() {
+				// 獲取裝置像素比
+				const dpr = window.devicePixelRatio || 1;
+
+				// 將畫布的內部繪圖尺寸設定為 CSS 尺寸 * dpr
+				// 這樣在高解析度螢幕上也能保持清晰
+				canvas.width = canvas.clientWidth * dpr;
+				canvas.height = canvas.clientHeight * dpr;
+
+				// 縮放繪圖環境，讓繪圖座標與 CSS 尺寸匹配
+				ctx.scale(dpr, dpr);
+			}
+			setCanvasSize();
+
+			// 監聽視窗大小改變事件，確保畫布尺寸隨時更新
+			window.addEventListener('resize', setCanvasSize);
+					
+			// 儲存繪圖軌跡點的清單
+			let pathPoint = [];
+			let pathPoints = [];
+			let pathColors = [];
+			let pathSizes = [];
+			let pathShapes = [];
+			let drawnButterGroups = [];
+			let isDrawing = false;
+
+			// 設定畫筆樣式
+			ctx.lineWidth = 8;
+			ctx.lineCap = 'round';
+			ctx.lineJoin = 'round';
+			ctx.strokeStyle = "rgba(177, 188, 204, 0.5)";
+			
+			// ----------------------
+			// 滑鼠事件處理器
+			// ----------------------
+
+
+			function drawSmoothPath(pointsToDraw) {
+				if (pointsToDraw.length < 2) return;
+
+				const smoothPathPoints = [];
+				const rect = canvas.getBoundingClientRect();
+				
+				// 這裡我們使用一個簡化的 Catmull-Rom 曲線概念
+				// 每次只畫一小段，並將曲線點連接起來
+				ctx.beginPath();
+				ctx.moveTo(pointsToDraw[0].x - rect.left, pointsToDraw[0].y - rect.top);
+				smoothPathPoints.push(pointsToDraw[0]);
+
+				for (let i = 1; i < pointsToDraw.length - 2; i++) {
+					const p1 = pointsToDraw[i];
+					const p2 = pointsToDraw[i + 1];
+					
+					// 找到中點，作為下一條線的控制點
+					const midPoint = {
+						x: (p1.x + p2.x) / 2,
+						y: (p1.y + p2.y) / 2
+					};
+					
+					// 使用二次貝茲曲線從當前點畫到中點
+					ctx.quadraticCurveTo(p1.x - rect.left, p1.y - rect.top, midPoint.x - rect.left, midPoint.y - rect.top);
+
+					// 將控制點和中點存入清單
+					smoothPathPoints.push(p1);
+					smoothPathPoints.push(midPoint);
+				}
+
+				// 處理最後的兩個點，以確保路徑完整
+				if (pointsToDraw.length >= 2) {
+					const lastPoint = pointsToDraw[pointsToDraw.length - 1];
+					const prevPoint = pointsToDraw[pointsToDraw.length - 2];
+					ctx.quadraticCurveTo(prevPoint.x - rect.left, prevPoint.y - rect.top, lastPoint.x - rect.left, lastPoint.y - rect.top);
+					// 將最後兩個點也存入清單
+					smoothPathPoints.push(prevPoint);
+					smoothPathPoints.push(lastPoint);
+				}
+				
+				ctx.stroke();
+
+				return smoothPathPoints;
+			}
+			
+			function redrawAllPaths() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				drawSmoothPath(pathPoint);
+			}
+			
+			
+			// 滑鼠按下時開始繪圖
+			canvas.addEventListener('mousedown', (e) => {
+				isDrawing = true;
+				pathPoint = [];
+								
+				// 將滑鼠的起始位置作為第一個點
+				const x = e.clientX;
+				const y = e.clientY;
+				pathPoint.push({ x, y });
+
+				// 開始繪圖路徑
+				ctx.beginPath();
+				ctx.moveTo(x, y);
+				
+				redrawAllPaths();
+			});
+
+			// 滑鼠移動時畫出軌跡
+			canvas.addEventListener('mousemove', (e) => {
+				if (!isDrawing) return;
+				
+				// 將當前滑鼠位置加入軌跡清單
+				const x = e.clientX;
+				const y = e.clientY;
+				pathPoint.push({ x, y });
+				
+				// 畫一條從上一個點到當前點的線
+				redrawAllPaths();
+				drawSmoothPath(pathPoint);
+			});
+			
+			function removeAllExcept(scene, exceptions) {
+				// 建立一個要移除的物件清單
+				const toRemove = [];
+				
+				// 遍歷 scene 的所有子物件
+				scene.children.forEach(child => {
+					// 檢查物件的名字是否在例外清單中
+					if (!exceptions.includes(child.name)) {
+						toRemove.push(child);
+					}
+				});
+
+				// 移除清單中的所有物件
+				toRemove.forEach(child => {
+					scene.remove(child);
+				});
+			}
+			
+			function drawAllButter() {
+				// 遍歷 scene 的所有子物件
+				pathPoints.forEach((path, pathIndex) => {
+					if (pathIndex == (pathPoints.length - 1)) {
+						let currentDrawingPoints3D = [];
+						path.forEach((pos, posIndex) => {
+							const raycaster = new THREE.Raycaster();
+							const canvasWidth = window.innerWidth;
+							const canvasHeight = window.innerHeight;
+
+							// 將 2D 座標從左上角原點，轉換成中心點原點
+							const centered_x = (pos.x / canvasWidth) * 2 - 1;
+							const centered_y = -(pos.y / canvasHeight) * 2 + 1;
+
+							const orig = new THREE.Vector2(centered_x, centered_y);							
+							raycaster.setFromCamera(orig, camera);
+								
+							const cakeM = scene.getObjectByName("cakeModel");
+							const intersects = raycaster.intersectObjects([cakeM],true); 
+							currentDrawingPoints3D.push(intersects[0].point);
+						});
+						const newButterGroup = new THREE.Group();
+						var angleLast = 0;
+						const curve = new THREE.CatmullRomCurve3(currentDrawingPoints3D);
+						const curveLength = curve.getLength();
+						let c_points;
+						if (pathShapes[pathIndex] == 4) {
+							c_points = curve.getPoints(Math.round(curveLength*1000/pathSizes[pathIndex]));
+						} else {
+							c_points = curve.getPoints(Math.round(curveLength*300/pathSizes[pathIndex]));
+						}
+							
+						c_points.forEach((c_point, c_pointIndex) => {
+							if (pathShapes[pathIndex] == 4) {
+								const vectorA = new THREE.Vector3(1, 0, 0);
+								let vectorB;
+								if (c_pointIndex != (c_points.length - 1)) {
+									vectorB = new THREE.Vector3((c_points[c_pointIndex+1].x - c_point.x)*1000, 0, (c_points[c_pointIndex+1].z - c_point.z)*1000);
+								} else {
+									vectorB = new THREE.Vector3(0, 0, 0);
+								}
+								const model = butter2Model.clone();
+								
+								if (vectorB.length() != 0) {
+									// 使用 angleTo() 方法直接計算角度（弧度）
+									const angle = vectorA.angleTo(vectorB);
+									angleLast = angle;
+									model.rotation.y = angle;
+								} else {
+									model.rotation.y = angleLast;
+								}
+								model.scale.set(pathSizes[pathIndex]/500, pathSizes[pathIndex]/500, pathSizes[pathIndex]/500);
+								
+								const box = new THREE.Box3().setFromObject(model);
+								const scaledModelHeight = box.max.y - box.min.y;
+								const scaledHalfHeight = scaledModelHeight / 2;
+
+								model.position.set(c_point.x, c_point.y + scaledHalfHeight, c_point.z);
+								// 複製材質
+								model.traverse(function(child) {
+									if (child.isMesh) {
+										child.material = new THREE.MeshStandardMaterial({
+											color: pathColors[pathIndex],
+											roughness: 1, // 粗糙度，0 為光滑，1 為粗糙
+											metalness: 0.1  // 金屬度，0 為非金屬，1 為金屬
+										});
+									}
+								});
+								newButterGroup.add(model);
+							} else {
+								if (true) {
+									const model = butter1Model.clone();
+								
+									model.scale.set(pathSizes[pathIndex]/500, pathSizes[pathIndex]/500, pathSizes[pathIndex]/500);
+									
+									const box = new THREE.Box3().setFromObject(model);
+									const scaledModelHeight = box.max.y - box.min.y;
+									const scaledHalfHeight = scaledModelHeight / 2;
+
+									model.position.set(c_point.x, c_point.y + scaledHalfHeight, c_point.z);
+									// 複製材質
+									model.traverse(function(child) {
+										if (child.isMesh) {
+											child.material = new THREE.MeshStandardMaterial({
+												color: pathColors[pathIndex],
+												roughness: 1, // 粗糙度，0 為光滑，1 為粗糙
+												metalness: 0.1  // 金屬度，0 為非金屬，1 為金屬
+											});
+										}
+									});
+									newButterGroup.add(model);
+								}
+							}
+						});
+						scene.add(newButterGroup);
+						drawnButterGroups.push(newButterGroup);
+					}
+				});
+			}
+			
+			function removeLastButterGroup() {
+				// 檢查陣列是否為空
+				if (drawnButterGroups.length > 0) {
+					// 從陣列中取出最後一個群組
+					const lastGroup = drawnButterGroups.pop();
+					
+					// 從場景中移除這個群組
+					scene.remove(lastGroup);
+					
+					// 釋放記憶體
+					lastGroup.children.forEach(child => {
+						if (child.geometry) child.geometry.dispose();
+						if (child.material) child.material.dispose();
+					});
+				}
+			}
+			
+			// 滑鼠放開時停止繪圖並清除畫布
+			canvas.addEventListener('mouseup', () => {
+				isDrawing = false;
+				if (pathPoint.length > 2) {
+					// 清除畫布並重新繪製所有路徑 (包含最後完成的路徑)
+					redrawAllPaths();
+					const smoothedPoints = drawSmoothPath(pathPoint);
+					pathPoints.push(smoothedPoints);
+					pathColors.push(co);
+					pathSizes.push(sz);
+					pathShapes.push(sp);
+					
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					
+					drawAllButter();
+				}
+			});
+
+			// 滑鼠離開畫布時也停止繪圖
+			canvas.addEventListener('mouseleave', () => {
+				if (isDrawing) {
+					isDrawing = false;
+				
+					if (pathPoint.length > 2) {
+						redrawAllPaths();
+						const smoothedPoints = drawSmoothPath(pathPoint);
+						pathPoints.push(smoothedPoints);
+						pathColors.push(co);
+						pathSizes.push(sz);
+						pathShapes.push(sp);
+					
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						
+						drawAllButter();
+					}
+				}
+			});
+
+			$("#page2").css("display", "none");
+			$("#p_color").append("<div class='p_color'></div>");
+			$("#p_size").append("<div class='p_size'></div>");
+			$("#p_shape").append("<div class='p_shape'></div>");
+			$("#color").click(function () {
+				if (opt == 0) {
+					$("#contents").append("<div data-value='#F8EED4' class='colors' style='background-color:#F8EED4;transform:translate(0,1.2vmax);'></div>");
+					$("#contents").append("<div data-value='#F6D1AD' class='colors' style='background-color:#F6D1AD;transform:translate(0,1vmax);'></div>");
+					$("#contents").append("<div data-value='#F4ABA8' class='colors' style='background-color:#F4ABA8;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='#F8DDDF' class='colors' style='background-color:#F8DDDF;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='#D7EDED' class='colors' style='background-color:#D7EDED;transform:translate(0,0.1vmax);'></div>");
+					$("#contents").append("<div style='display:flex;flex-direction:column;color:#000000;font-size:1.5vmax;font-family:Noto Sans TC;transform:translate(0,-1.75vmax);'>自訂<input data-value='#000000' class='colors' type='color'></div>");
+					$("#contents").append("<div data-value='#B3DDE3' class='colors' style='background-color:#B3DDE3;transform:translate(0,0.1vmax);'></div>");
+					$("#contents").append("<div data-value='#DFEFE2' class='colors' style='background-color:#DFEFE2;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='#F4D5C1' class='colors' style='background-color:#F4D5C1;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='#C75879' class='colors' style='background-color:#C75879;transform:translate(0,1vmax);'></div>");
+					$("#contents").append("<div data-value='#98D1BD' class='colors' style='background-color:#98D1BD;transform:translate(0,1.2vmax);'></div>");
+					$(".colors").eq(co_p).addClass("active");
+					$("#option").css("display", "block");
+					$("#title").text("Color");
+					opt = 1;
+				} else if (opt == 1) {
+					$("#option").css("display", "none");
+					$("#contents").empty();
+					opt = 0;
+				} else {
+					$("#option").css("display", "none");
+					$("#contents").empty();
+					$("#option").css("animation", "none");
+					void $("#option")[0].offsetWidth;
+					$("#option").css("animation", "slide-in 0.5s forwards");
+					$("#contents").append("<div data-value='#F8EED4' class='colors' style='background-color:#F8EED4;transform:translate(0,1.2vmax);'></div>");
+					$("#contents").append("<div data-value='#F6D1AD' class='colors' style='background-color:#F6D1AD;transform:translate(0,1vmax);'></div>");
+					$("#contents").append("<div data-value='#F4ABA8' class='colors' style='background-color:#F4ABA8;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='#F8DDDF' class='colors' style='background-color:#F8DDDF;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='#D7EDED' class='colors' style='background-color:#D7EDED;transform:translate(0,0.1vmax);'></div>");
+					$("#contents").append("<div style='display:flex;flex-direction:column;color:#000000;font-size:1.5vmax;font-family:Noto Sans TC;transform:translate(0,-1.75vmax);'>自訂<input data-value='#000000' class='colors' type='color'></div>");
+					$("#contents").append("<div data-value='#B3DDE3' class='colors' style='background-color:#B3DDE3;transform:translate(0,0.1vmax);'></div>");
+					$("#contents").append("<div data-value='#DFEFE2' class='colors' style='background-color:#DFEFE2;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='#F4D5C1' class='colors' style='background-color:#F4D5C1;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='#C75879' class='colors' style='background-color:#C75879;transform:translate(0,1vmax);'></div>");
+					$("#contents").append("<div data-value='#98D1BD' class='colors' style='background-color:#98D1BD;transform:translate(0,1.2vmax);'></div>");
+					$(".colors").eq(co_p).addClass("active");
+					$("#option").css("display", "block");
+					$("#title").text("Color");
+					opt = 1;
+				}
+				$(".colors").click(function () {
+					$(".colors").removeClass("active");
+					$(this).addClass("active");
+					co = $(this).data('value');
+					co_p = $(this).index();
+					$(".p_color").css("background-color",co);
+				});
+				$("input").change(function () {
+					$(this).data('value',$(this).val());
+					co = $(this).data('value');
+					$(".p_color").css("background-color",co);
+				});
+			});
+			
+			$("#size").click(function () {
+				if (opt == 0) {
+					$("#contents").append("<div data-value='10' class='sizes' style='width:1vmax;height:1vmax;border-radius:0.5vmax;transform:translate(0,2.2vmax);'></div>");
+					$("#contents").append("<div data-value='12' class='sizes' style='width:1.2vmax;height:1.2vmax;border-radius:0.6vmax;transform:translate(0,1.9vmax);'></div>");
+					$("#contents").append("<div data-value='14' class='sizes' style='width:1.4vmax;height:1.4vmax;border-radius:0.7vmax;transform:translate(0,1.5vmax);'></div>");
+					$("#contents").append("<div data-value='16' class='sizes' style='width:1.6vmax;height:1.6vmax;border-radius:0.8vmax;transform:translate(0,1.2vmax);'></div>");
+					$("#contents").append("<div data-value='18' class='sizes' style='width:1.8vmax;height:1.8vmax;border-radius:0.9vmax;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='20' class='sizes' style='width:2vmax;height:2vmax;border-radius:1vmax;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='22' class='sizes' style='width:2.2vmax;height:2.2vmax;border-radius:1.1vmax;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='24' class='sizes' style='width:2.4vmax;height:2.4vmax;border-radius:1.2vmax;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='26' class='sizes' style='width:2.6vmax;height:2.6vmax;border-radius:1.3vmax;transform:translate(0,0.8vmax);'></div>");
+					$("#contents").append("<div data-value='28' class='sizes' style='width:2.8vmax;height:2.8vmax;border-radius:1.4vmax;transform:translate(0,1vmax);'></div>");
+					$("#contents").append("<div data-value='30' class='sizes' style='width:3vmax;height:3vmax;border-radius:1.5vmax;transform:translate(0,1.2vmax);'></div>");			
+					$(".sizes").eq(sz_p).addClass("active");					
+					$("#option").css("display", "block");
+					$("#title").text("Size");
+					opt = 2;
+				} else if (opt == 2) {
+					$("#option").css("display", "none");
+					$("#contents").empty();
+					opt = 0;
+				} else {
+					$("#option").css("display", "none");
+					$("#contents").empty();
+					$("#option").css("animation", "none");
+					void $("#option")[0].offsetWidth;
+					$("#option").css("animation", "slide-in 0.5s forwards");
+					$("#contents").append("<div data-value='10' class='sizes' style='width:1vmax;height:1vmax;border-radius:0.5vmax;transform:translate(0,2.2vmax);'></div>");
+					$("#contents").append("<div data-value='12' class='sizes' style='width:1.2vmax;height:1.2vmax;border-radius:0.6vmax;transform:translate(0,1.9vmax);'></div>");
+					$("#contents").append("<div data-value='14' class='sizes' style='width:1.4vmax;height:1.4vmax;border-radius:0.7vmax;transform:translate(0,1.5vmax);'></div>");
+					$("#contents").append("<div data-value='16' class='sizes' style='width:1.6vmax;height:1.6vmax;border-radius:0.8vmax;transform:translate(0,1.2vmax);'></div>");
+					$("#contents").append("<div data-value='18' class='sizes' style='width:1.8vmax;height:1.8vmax;border-radius:0.9vmax;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='20' class='sizes' style='width:2vmax;height:2vmax;border-radius:1vmax;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='22' class='sizes' style='width:2.2vmax;height:2.2vmax;border-radius:1.1vmax;transform:translate(0,0.5vmax);'></div>");
+					$("#contents").append("<div data-value='24' class='sizes' style='width:2.4vmax;height:2.4vmax;border-radius:1.2vmax;transform:translate(0,0.7vmax);'></div>");
+					$("#contents").append("<div data-value='26' class='sizes' style='width:2.6vmax;height:2.6vmax;border-radius:1.3vmax;transform:translate(0,0.8vmax);'></div>");
+					$("#contents").append("<div data-value='28' class='sizes' style='width:2.8vmax;height:2.8vmax;border-radius:1.4vmax;transform:translate(0,1vmax);'></div>");
+					$("#contents").append("<div data-value='30' class='sizes' style='width:3vmax;height:3vmax;border-radius:1.5vmax;transform:translate(0,1.2vmax);'></div>");			
+					$(".sizes").eq(sz_p).addClass("active");					
+					$("#option").css("display", "block");
+					$("#title").text("Size");
+					opt = 2;
+				}
+				$(".sizes").click(function () {
+					$(".sizes").removeClass("active");
+					$(this).addClass("active");
+					sz = parseInt($(this).data('value'));
+					sz_p = $(this).index();
+					$(".p_size").css("width",(sz/10)+"vmax");
+					$(".p_size").css("height",(sz/10)+"vmax");
+					$(".p_size").css("border-radius",(sz/20)+"vmax");
+				});
+			});
+			
+			$("#shape").click(function () {
+				if (opt == 0) {
+					$("#contents").append("<div data-value='4' class='shapes' style='background-image:url(butter4.png);'></div>");
+					$("#contents").append("<div data-value='3' class='shapes' style='background-image:url(butter3.png);'></div>");
+					$(".shapes").eq(sp_p).addClass("active");
+					$("#option").css("display", "block");
+					$("#title").text("Shape");
+					opt = 3;
+				} else if (opt == 3) {
+					$("#option").css("display", "none");
+					$("#contents").empty();
+					opt = 0;
+				} else {
+					$("#option").css("display", "none");
+					$("#contents").empty();
+					$("#option").css("animation", "none");
+					void $("#option")[0].offsetWidth;
+					$("#option").css("animation", "slide-in 0.5s forwards");
+					$("#contents").append("<div data-value='4' class='shapes' style='background-image:url(butter4.png);'></div>");
+					$("#contents").append("<div data-value='3' class='shapes' style='background-image:url(butter3.png);'></div>");
+					$(".shapes").eq(sp_p).addClass("active");
+					$("#option").css("display", "block");
+					$("#title").text("Shape");
+					opt = 3;
+				}
+				$(".shapes").click(function () {
+					$(".shapes").removeClass("active");
+					$(this).addClass("active");
+					sp = parseInt($(this).data('value'));
+					sp_p = $(this).index();
+					$(".p_shape").css("background-image", "url('butter" + sp + ".png')");
+				});
+			});
+			
+			$("#done").click(function () {
+				$("#canvas2D").css("display", "none");
+				$("#page1").css("display", "none");
+				$("#page2").css("display", "block");
+				$("#option2").css("display", "block");
+				camera.position.set(0, 2.6, 0.35);
+				camera.lookAt(0, 0, -0.15);
+			});
+			
+			$("#back").click(function () {
+				pathPoints.pop();
+				pathColors.pop();
+				pathSizes.pop();
+				pathShapes.pop();
+				removeLastButterGroup();
+			});
+			
+			$("#edit").click(function () {
+				$("#canvas2D").css("display", "block");
+				$("#page1").css("display", "block");
+				$("#page2").css("display", "none");
+				$("#option2").css("display", "none");
+				camera.position.set(0, 2.8, 0);
+				camera.lookAt(0, 0, 0);
+			});
+			
+			$("#photo").click(function () {
+				const canvasO = document.getElementById("canvas3D");
+				const canvasP = document.createElement("canvas");
+				const ctxP = canvasP.getContext("2d");
+
+				renderer.render(scene, camera); 
+				const imageDataURL = canvasO.toDataURL('image/jpeg', 1.0);
+				
+				canvasP.width = canvasO.height + 100;
+				canvasP.height = canvasO.height + 300;
+				
+				const img = new Image();
+				img.src = imageDataURL;
+				
+				img.onload = () => {
+					// a. 繪製白色背景
+					ctxP.fillStyle = 'white';
+					ctxP.fillRect(0, 0, canvasP.width, canvasP.height);
+
+					// c. 繪製 3D 圖片到拍立得畫布上
+					ctxP.drawImage(img, (canvasO.width - canvasO.height)/2, 0, canvasO.height, canvasO.height, 50, 50, canvasO.height, canvasO.height);
+					
+					const gradient = ctxP.createRadialGradient(50 + canvasO.height/2, 50 + canvasO.height/2, canvasO.height * 0.4, 50 + canvasO.height/2, 50 + canvasO.height/2, canvasO.height * 0.7);
+
+					// 設定漸變的顏色停止點
+					// 中心是透明的
+					gradient.addColorStop(0, 'rgba(232, 222, 205, 0)'); 
+					// 靠近邊緣開始變暗
+					gradient.addColorStop(0.7, 'rgba(232, 222, 205, 0.4)'); 
+					// 邊緣最暗
+					gradient.addColorStop(1, 'rgba(232, 222, 205, 0.7)'); 
+					
+					// 將漸變設定為繪圖樣式
+					ctxP.fillStyle = gradient;
+					// 繪製一個覆蓋照片區域的矩形，讓暗角效果生效
+					ctxP.fillRect(50, 50, canvasO.height, canvasO.height);
+					
+					// 4. 將拍立得畫布轉換成 JPG 格式的資料 URL
+					const finalImageURL = canvasP.toDataURL('image/jpeg', 1.0);
+
+					// 5. 創建一個臨時的下載連結並觸發點擊
+					const downloadLink = document.createElement('a');
+					downloadLink.href = finalImageURL;
+					downloadLink.download = 'Gratitude_on_the_cake.jpg'; // 設定下載檔案名稱
+					document.body.appendChild(downloadLink);
+					downloadLink.click(); // 模擬點擊
+					document.body.removeChild(downloadLink); // 移除臨時連結
+				};
+			});
+			
+			$("#again").click(function () {
+				opt = 0;
+				co = "#F8EED4";
+				sz = 10;
+				sp = 4;
+				co_p = 0;
+				sz_p = 0;
+				sp_p = 0;
+				pathPoints = [];
+				pathColors = [];
+				pathSizes = [];
+				pathShapes = [];
+				drawnButterGroups = [];
+				isDrawing = false;
+				removeAllExcept(scene, ["cakeModel", "plateModel", "ambientLight", "mainLight", "fillLight", "pointLight"]);
+				$("#p_color").empty();
+				$("#p_size").empty();
+				$("#p_shape").empty();
+				$("#p_color").append("<div class='p_color'></div>");
+				$("#p_size").append("<div class='p_size'></div>");
+				$("#p_shape").append("<div class='p_shape'></div>");
+				$("#contents").empty();
+				$("#canvas2D").css("display", "block");
+				$("#page1").css("display", "block");
+				$("#page2").css("display", "none");
+				$("#option").css("display", "none");
+				$("#option2").css("display", "none");
+				camera.position.set(0, 2.8, 0);
+				camera.lookAt(0, 0, 0);
+			});
+		});
+	</script>
+</body>
+
+</html>
